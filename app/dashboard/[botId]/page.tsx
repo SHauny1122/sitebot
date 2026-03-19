@@ -55,7 +55,7 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
         </div>
       </div>
 
-      <EmbedScriptCard embedScript={embedScript} />
+      <EmbedScriptCard botId={bot.id} embedScript={embedScript} />
 
       <TestChat botId={bot.id} status={statusText} />
     </main>
