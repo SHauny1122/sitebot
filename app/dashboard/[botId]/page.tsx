@@ -3,7 +3,7 @@ import { BotCustomizationCard } from "@/components/bot-customization-card";
 import { EmbedScriptCard } from "@/components/embed-script-card";
 import { TestChat } from "@/components/test-chat";
 import { requireUser } from "@/lib/auth";
-import { normalizeBotAppearance } from "@/lib/bot-appearance";
+import { BOT_APPEARANCE_DEFAULTS, normalizeBotAppearance } from "@/lib/bot-appearance";
 import { env } from "@/lib/env";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -11,18 +11,23 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
   const { botId } = await params;
   const user = await requireUser();
 
-  const { data: bot } = await supabaseAdmin
+  const { data: bot, error: botError } = await supabaseAdmin
     .from("bots")
-    .select(
-      "id,name,website_url,status,button_text,button_color,button_style,header_color,widget_title,welcome_message,position"
-    )
+    .select("id,name,website_url,status")
     .eq("id", botId)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!bot) {
+  if (botError || !bot) {
     notFound();
   }
+
+  const { data: appearanceRow } = await supabaseAdmin
+    .from("bots")
+    .select("button_text,button_color,button_style,header_color,widget_title,welcome_message,position")
+    .eq("id", botId)
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   const { count: pagesIndexed } = await supabaseAdmin
     .from("bot_pages")
@@ -31,15 +36,17 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
 
   const embedScript = `<script src="${env.NEXT_PUBLIC_SITE_URL}/embed.js" data-bot="${bot.id}"></script>`;
   const statusText = String(bot.status ?? "pending").toUpperCase();
-  const appearance = normalizeBotAppearance({
-    buttonText: bot.button_text,
-    buttonColor: bot.button_color,
-    buttonStyle: bot.button_style,
-    headerColor: bot.header_color,
-    widgetTitle: bot.widget_title,
-    welcomeMessage: bot.welcome_message,
-    position: bot.position
-  });
+  const appearance = appearanceRow
+    ? normalizeBotAppearance({
+        buttonText: appearanceRow.button_text,
+        buttonColor: appearanceRow.button_color,
+        buttonStyle: appearanceRow.button_style,
+        headerColor: appearanceRow.header_color,
+        widgetTitle: appearanceRow.widget_title,
+        welcomeMessage: appearanceRow.welcome_message,
+        position: appearanceRow.position
+      })
+    : BOT_APPEARANCE_DEFAULTS;
 
   return (
     <main className="container-shell py-8">
