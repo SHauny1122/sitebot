@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+import { BotCustomizationCard } from "@/components/bot-customization-card";
 import { EmbedScriptCard } from "@/components/embed-script-card";
 import { TestChat } from "@/components/test-chat";
 import { requireUser } from "@/lib/auth";
+import { normalizeBotAppearance } from "@/lib/bot-appearance";
 import { env } from "@/lib/env";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -11,7 +13,9 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
 
   const { data: bot } = await supabaseAdmin
     .from("bots")
-    .select("id,name,website_url,status")
+    .select(
+      "id,name,website_url,status,button_text,button_color,button_style,header_color,widget_title,welcome_message,position"
+    )
     .eq("id", botId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -27,6 +31,15 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
 
   const embedScript = `<script src="${env.NEXT_PUBLIC_SITE_URL}/embed.js" data-bot="${bot.id}"></script>`;
   const statusText = String(bot.status ?? "pending").toUpperCase();
+  const appearance = normalizeBotAppearance({
+    buttonText: bot.button_text,
+    buttonColor: bot.button_color,
+    buttonStyle: bot.button_style,
+    headerColor: bot.header_color,
+    widgetTitle: bot.widget_title,
+    welcomeMessage: bot.welcome_message,
+    position: bot.position
+  });
 
   return (
     <main className="container-shell py-8">
@@ -56,6 +69,8 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
       </div>
 
       <EmbedScriptCard botId={bot.id} embedScript={embedScript} />
+
+      <BotCustomizationCard botId={bot.id} initialAppearance={appearance} />
 
       <TestChat botId={bot.id} status={statusText} />
     </main>

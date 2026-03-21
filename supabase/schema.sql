@@ -14,8 +14,23 @@ create table if not exists public.bots (
   name text not null,
   website_url text not null,
   status text not null default 'pending' check (status in ('pending', 'ready', 'failed')),
+  button_text text not null default 'Chat',
+  button_color text not null default '#0d9488',
+  button_style text not null default 'circle' check (button_style in ('circle', 'pill', 'rounded')),
+  header_color text not null default '#0d9488',
+  widget_title text not null default 'SiteChat',
+  welcome_message text not null default 'Hi! How can I help you today?',
+  position text not null default 'bottom-right' check (position in ('bottom-right', 'bottom-left')),
   created_at timestamptz not null default now()
 );
+
+alter table public.bots add column if not exists button_text text not null default 'Chat';
+alter table public.bots add column if not exists button_color text not null default '#0d9488';
+alter table public.bots add column if not exists button_style text not null default 'circle' check (button_style in ('circle', 'pill', 'rounded'));
+alter table public.bots add column if not exists header_color text not null default '#0d9488';
+alter table public.bots add column if not exists widget_title text not null default 'SiteChat';
+alter table public.bots add column if not exists welcome_message text not null default 'Hi! How can I help you today?';
+alter table public.bots add column if not exists position text not null default 'bottom-right' check (position in ('bottom-right', 'bottom-left'));
 
 create table if not exists public.bot_pages (
   id uuid primary key default gen_random_uuid(),
