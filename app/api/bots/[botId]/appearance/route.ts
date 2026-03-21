@@ -37,6 +37,27 @@ type AppearanceRow = {
   position: string;
 };
 
+function isAppearanceSchemaMissingError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as { code?: string; message?: string };
+  const message = String(candidate.message ?? "").toLowerCase();
+
+  return (
+    candidate.code === "PGRST204" ||
+    message.includes("schema cache") ||
+    message.includes("button_color") ||
+    message.includes("button_text") ||
+    message.includes("button_style") ||
+    message.includes("header_color") ||
+    message.includes("widget_title") ||
+    message.includes("welcome_message") ||
+    message.includes("position")
+  );
+}
+
 function mapAppearance(row: AppearanceRow | null | undefined) {
   if (!row) {
     return BOT_APPEARANCE_DEFAULTS;
@@ -70,6 +91,17 @@ export async function GET(_: Request, { params }: { params: Promise<{ botId: str
     .maybeSingle();
 
   if (error) {
+    if (isAppearanceSchemaMissingError(error)) {
+      return NextResponse.json(
+        {
+          appearance: BOT_APPEARANCE_DEFAULTS,
+          migrationRequired: true,
+          message: "Appearance settings not available yet. Apply latest database migration."
+        },
+        { headers: corsHeaders }
+      );
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
 
@@ -116,6 +148,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ bo
     .maybeSingle();
 
   if (error) {
+    if (isAppearanceSchemaMissingError(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "Appearance settings are not available yet for this project database. Please run the latest Supabase migration and try again."
+        },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
