@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type InstallTab = "wordpress" | "manual";
+type InstallTab = "wordpress" | "manual" | "wix";
 
 export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedScript: string }) {
   const [tab, setTab] = useState<InstallTab>("wordpress");
@@ -33,7 +33,9 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
     <div className="mb-6 card p-5">
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-white">Install your chatbot</h2>
-        <p className="mt-1 text-sm text-slate-400">Choose WordPress for a guided setup or use the manual embed script.</p>
+        <p className="mt-1 text-sm text-slate-400">
+          Choose Manual, WordPress, or Wix. For Wix, no app install is needed — just paste one script into Wix Custom Code.
+        </p>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
@@ -58,6 +60,17 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
           type="button"
         >
           Manual Install
+        </button>
+        <button
+          className={`rounded-lg border px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition ${
+            tab === "wix"
+              ? "border-[#86EFAC]/30 bg-[#86EFAC]/10 text-[#86EFAC]"
+              : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
+          }`}
+          onClick={() => setTab("wix")}
+          type="button"
+        >
+          Wix
         </button>
       </div>
 
@@ -99,10 +112,10 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
             </ol>
           </div>
         </div>
-      ) : (
-        <div>
+      ) : tab === "wix" ? (
+        <div className="space-y-4">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-sm text-slate-300">Paste this before the closing body tag on your site.</p>
+            <p className="text-sm text-slate-300">Works with Wix. No app install needed — paste this script into Wix Custom Code.</p>
             <button className="btn-secondary h-9 px-3 text-xs" onClick={copyScript} type="button">
               {copiedScript ? "Copied" : "Copy script"}
             </button>
@@ -111,6 +124,47 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
           <pre className="overflow-auto whitespace-pre-wrap break-all rounded-xl border border-white/10 bg-[#0B0F0D] p-3 text-xs text-slate-100">
             {embedScript}
           </pre>
+
+          <div className="rounded-xl border border-white/10 bg-[#0B0F0D] p-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Wix setup steps</p>
+            <ol className="list-decimal space-y-1.5 pl-4 text-sm text-slate-300">
+              <li>In Wix, open your site dashboard.</li>
+              <li>Go to Settings.</li>
+              <li>Open Custom Code.</li>
+              <li>Click “Add Custom Code”.</li>
+              <li>Paste the script snippet.</li>
+              <li>Apply it to All Pages.</li>
+              <li>Save and publish your site.</li>
+            </ol>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-sm text-slate-300">Manual install with one script snippet.</p>
+            <button className="btn-secondary h-9 px-3 text-xs" onClick={copyScript} type="button">
+              {copiedScript ? "Copied" : "Copy script"}
+            </button>
+          </div>
+
+          <pre className="overflow-auto whitespace-pre-wrap break-all rounded-xl border border-white/10 bg-[#0B0F0D] p-3 text-xs text-slate-100">
+            {embedScript}
+          </pre>
+
+          <div className="rounded-xl border border-white/10 bg-[#0B0F0D] p-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Manual setup steps</p>
+            <ol className="list-decimal space-y-1.5 pl-4 text-sm text-slate-300">
+              <li>Copy the script snippet.</li>
+              <li>Open your website code.</li>
+              <li>Paste the script before the closing &lt;/body&gt; tag.</li>
+              <li>Save and deploy/publish your site.</li>
+              <li>Refresh the site and confirm the chatbot appears.</li>
+            </ol>
+          </div>
+
+          <p className="text-xs text-slate-400">
+            Works on custom HTML sites, React/Next.js sites, and most website builders that allow custom code.
+          </p>
         </div>
       )}
     </div>

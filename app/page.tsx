@@ -65,7 +65,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Everything you need to launch your chatbot fast.</h2>
           <p className="mt-2 max-w-2xl text-sm text-gray-400 sm:text-base">
-            Train on your site content, customize your assistant, and go live with a simple script install.
+            Train on your site content, customize your assistant, and go live with one script on Manual, WordPress, or Wix.
           </p>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4 md:mt-12 md:gap-8">
@@ -105,7 +105,7 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h3 className="text-2xl font-semibold tracking-tight">Copy-paste install</h3>
-              <p className="mt-4 text-base leading-relaxed text-gray-300">Use a simple script snippet to add your chatbot to any site in minutes.</p>
+              <p className="mt-4 text-base leading-relaxed text-gray-300">Works with Wix too — no app install needed, just paste one script in Wix Custom Code.</p>
             </article>
 
             <article className="min-h-[220px] rounded-2xl border border-white/20 bg-[#111] p-6 sm:p-8 md:min-h-[240px] md:p-10 transition duration-200 hover:-translate-y-1 hover:border-[#86EFAC]/40 hover:shadow-[0_8px_30px_-12px_rgba(134,239,172,0.3)]">
@@ -215,7 +215,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold tracking-wide text-white">SiteChat</p>
-            <p className="mt-1 text-sm text-gray-400">AI chatbot infrastructure for modern websites.</p>
+            <p className="mt-1 text-sm text-gray-400">AI chatbot infrastructure for modern websites, including Wix installs.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-5 text-sm text-gray-400">
