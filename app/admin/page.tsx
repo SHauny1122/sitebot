@@ -21,15 +21,15 @@ export default async function AdminPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="card p-5">
-          <p className="text-sm text-slate-500">Users</p>
+          <p className="text-sm text-slate-600">Users</p>
           <p className="mt-2 text-2xl font-semibold">{profilesRes.data?.length ?? 0}</p>
         </div>
         <div className="card p-5">
-          <p className="text-sm text-slate-500">Bots</p>
+          <p className="text-sm text-slate-600">Bots</p>
           <p className="mt-2 text-2xl font-semibold">{botsRes.data?.length ?? 0}</p>
         </div>
         <div className="card p-5">
-          <p className="text-sm text-slate-500">Messages (latest)</p>
+          <p className="text-sm text-slate-600">Messages (latest)</p>
           <p className="mt-2 text-2xl font-semibold">{messagesRes.data?.length ?? 0}</p>
         </div>
       </div>
@@ -39,9 +39,9 @@ export default async function AdminPage() {
           <h2 className="mb-3 font-semibold">Recent users</h2>
           <div className="space-y-2 text-sm">
             {(profilesRes.data ?? []).map((profile) => (
-              <div className="rounded-lg border border-slate-200 p-2" key={profile.user_id}>
+              <div className="rounded-lg border border-gray-200 p-2" key={profile.user_id}>
                 <p className="break-all font-medium">{profile.email ?? "Unknown"}</p>
-                <p className="text-slate-500">Plan: {profile.plan}</p>
+                <p className="text-slate-600">Plan: {profile.plan}</p>
               </div>
             ))}
           </div>
@@ -51,9 +51,9 @@ export default async function AdminPage() {
           <h2 className="mb-3 font-semibold">Recent bots</h2>
           <div className="space-y-2 text-sm">
             {(botsRes.data ?? []).map((bot) => (
-              <div className="rounded-lg border border-slate-200 p-2" key={bot.id}>
+              <div className="rounded-lg border border-gray-200 p-2" key={bot.id}>
                 <p className="font-medium">{bot.name}</p>
-                <p className="text-slate-500">Status: {bot.status}</p>
+                <p className="text-slate-600">Status: {bot.status}</p>
               </div>
             ))}
           </div>
@@ -63,9 +63,9 @@ export default async function AdminPage() {
           <h2 className="mb-3 font-semibold">Recent messages</h2>
           <div className="space-y-2 text-sm">
             {(messagesRes.data ?? []).slice(0, 12).map((message) => (
-              <div className="rounded-lg border border-slate-200 p-2" key={message.id}>
+              <div className="rounded-lg border border-gray-200 p-2" key={message.id}>
                 <p className="font-medium">{message.role}</p>
-                <p className="break-all text-slate-500">Bot: {message.bot_id}</p>
+                <p className="break-all text-slate-600">Bot: {message.bot_id}</p>
               </div>
             ))}
           </div>

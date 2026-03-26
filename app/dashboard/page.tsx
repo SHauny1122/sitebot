@@ -22,11 +22,11 @@ export default async function DashboardPage() {
   const messages = usage?.message_count ?? 0;
 
   return (
-    <main className="container-shell py-8">
+    <main className="container-shell py-10 md:py-12">
       <header className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-slate-600">Manage chatbots, test responses, and copy embed scripts.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
+          <p className="mt-1 text-sm text-slate-400">Manage chatbots, test responses, and copy embed scripts.</p>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
           <Link className="btn-secondary" href="/admin">
@@ -38,16 +38,16 @@ export default async function DashboardPage() {
 
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <div className="card p-5">
-          <p className="text-sm text-slate-500">Plan</p>
-          <p className="mt-2 text-xl font-semibold capitalize">{plan}</p>
+          <p className="text-sm text-slate-400">Plan</p>
+          <p className="mt-2 text-xl font-semibold capitalize text-white">{plan}</p>
         </div>
         <div className="card p-5">
-          <p className="text-sm text-slate-500">Chatbots</p>
-          <p className="mt-2 text-xl font-semibold">{bots?.length ?? 0}</p>
+          <p className="text-sm text-slate-400">Chatbots</p>
+          <p className="mt-2 text-xl font-semibold text-white">{bots?.length ?? 0}</p>
         </div>
         <div className="card p-5">
-          <p className="text-sm text-slate-500">Messages this month</p>
-          <p className="mt-2 text-xl font-semibold">
+          <p className="text-sm text-slate-400">Messages this month</p>
+          <p className="mt-2 text-xl font-semibold text-white">
             {messages}
             {plan === "free" ? ` / ${FREE_MESSAGE_LIMIT}` : ""}
           </p>

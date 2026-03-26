@@ -49,29 +49,29 @@ export default async function BotDetailPage({ params }: { params: Promise<{ botI
     : BOT_APPEARANCE_DEFAULTS;
 
   return (
-    <main className="container-shell py-8">
+    <main className="container-shell py-10 md:py-12">
       <div className="mb-6">
         <div className="mb-2 flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">{bot.name}</h1>
-          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+          <h1 className="text-3xl font-semibold tracking-tight text-white">{bot.name}</h1>
+          <span className="rounded-full border border-[#86EFAC]/30 bg-[#86EFAC]/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-[#86EFAC]">
             {statusText}
           </span>
         </div>
-        <p className="mt-1 break-all text-sm text-slate-600">{bot.website_url}</p>
+        <p className="mt-1 break-all text-sm text-slate-400">{bot.website_url}</p>
       </div>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Source website</p>
-          <p className="mt-1 break-all text-sm font-medium text-slate-900">{bot.website_url}</p>
+        <div className="rounded-xl border border-white/10 bg-[#111714] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Source website</p>
+          <p className="mt-1 break-all text-sm font-medium text-white">{bot.website_url}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Training status</p>
-          <p className="mt-1 text-sm font-medium text-slate-900">{statusText}</p>
+        <div className="rounded-xl border border-white/10 bg-[#111714] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Training status</p>
+          <p className="mt-1 text-sm font-medium text-white">{statusText}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Pages indexed</p>
-          <p className="mt-1 text-sm font-medium text-slate-900">{pagesIndexed ?? 0}</p>
+        <div className="rounded-xl border border-white/10 bg-[#111714] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Pages indexed</p>
+          <p className="mt-1 text-sm font-medium text-white">{pagesIndexed ?? 0}</p>
         </div>
       </div>
 

@@ -32,16 +32,16 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
   return (
     <div className="mb-6 card p-5">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Install your chatbot</h2>
-        <p className="mt-1 text-sm text-slate-600">Choose WordPress for a guided setup or use the manual embed script.</p>
+        <h2 className="text-lg font-semibold text-white">Install your chatbot</h2>
+        <p className="mt-1 text-sm text-slate-400">Choose WordPress for a guided setup or use the manual embed script.</p>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
         <button
           className={`rounded-lg border px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition ${
             tab === "wordpress"
-              ? "border-brand-200 bg-brand-50 text-brand-700"
-              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+              ? "border-[#86EFAC]/30 bg-[#86EFAC]/10 text-[#86EFAC]"
+              : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
           }`}
           onClick={() => setTab("wordpress")}
           type="button"
@@ -51,8 +51,8 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
         <button
           className={`rounded-lg border px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition ${
             tab === "manual"
-              ? "border-brand-200 bg-brand-50 text-brand-700"
-              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+              ? "border-[#86EFAC]/30 bg-[#86EFAC]/10 text-[#86EFAC]"
+              : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
           }`}
           onClick={() => setTab("manual")}
           type="button"
@@ -63,7 +63,7 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
 
       {tab === "wordpress" ? (
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-300">
             Install the plugin in WordPress, paste your Bot ID, and your chatbot will appear automatically.
           </p>
 
@@ -77,19 +77,19 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
             </a>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="rounded-xl border border-white/10 bg-[#0B0F0D] p-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Bot ID</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Bot ID</p>
               <button className="btn-secondary h-8 px-2.5 text-[11px]" onClick={copyBotId} type="button">
                 {copiedBotId ? "Copied" : "Copy Bot ID"}
               </button>
             </div>
-            <p className="break-all rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700">{botId}</p>
+            <p className="break-all rounded-lg border border-white/10 bg-[#111714] px-2.5 py-2 text-xs text-slate-300">{botId}</p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-3">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Setup steps</p>
-            <ol className="list-decimal space-y-1.5 pl-4 text-sm text-slate-700">
+          <div className="rounded-xl border border-white/10 bg-[#0B0F0D] p-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Setup steps</p>
+            <ol className="list-decimal space-y-1.5 pl-4 text-sm text-slate-300">
               <li>Download the plugin zip.</li>
               <li>In WordPress, go to Plugins &gt; Add New &gt; Upload Plugin.</li>
               <li>Activate “SiteChat AI Chatbot”.</li>
@@ -102,13 +102,13 @@ export function EmbedScriptCard({ botId, embedScript }: { botId: string; embedSc
       ) : (
         <div>
           <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-sm text-slate-600">Paste this before the closing body tag on your site.</p>
+            <p className="text-sm text-slate-300">Paste this before the closing body tag on your site.</p>
             <button className="btn-secondary h-9 px-3 text-xs" onClick={copyScript} type="button">
               {copiedScript ? "Copied" : "Copy script"}
             </button>
           </div>
 
-          <pre className="overflow-auto whitespace-pre-wrap break-all rounded-xl border border-slate-200 bg-slate-900 p-3 text-xs text-slate-100">
+          <pre className="overflow-auto whitespace-pre-wrap break-all rounded-xl border border-white/10 bg-[#0B0F0D] p-3 text-xs text-slate-100">
             {embedScript}
           </pre>
         </div>

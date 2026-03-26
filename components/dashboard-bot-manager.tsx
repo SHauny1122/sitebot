@@ -63,9 +63,9 @@ function buttonTextForStatus(status: UiStatus) {
 }
 
 function statusTone(status: UiStatus) {
-  if (status === "ready") return "text-emerald-600";
-  if (status === "failed") return "text-rose-600";
-  return "text-amber-600";
+  if (status === "ready") return "text-[#86EFAC]";
+  if (status === "failed") return "text-rose-400";
+  return "text-slate-400";
 }
 
 export function DashboardBotManager({ initialBots }: { initialBots: BotRow[] }) {
@@ -363,7 +363,7 @@ export function DashboardBotManager({ initialBots }: { initialBots: BotRow[] }) 
   return (
     <>
       <form className="card p-5" onSubmit={submit}>
-        <h2 className="mb-4 text-lg font-semibold">Create chatbot</h2>
+        <h2 className="mb-4 text-lg font-semibold text-white">Create chatbot</h2>
         <div className="space-y-3">
           <input
             className="input"
@@ -386,18 +386,18 @@ export function DashboardBotManager({ initialBots }: { initialBots: BotRow[] }) 
         </button>
 
         {inProgress && activeStatus ? (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-wide text-slate-500">
+          <div className="mt-4 rounded-xl border border-white/10 bg-[#0B0F0D] p-3">
+            <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-wide text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-brand-600/30 border-t-brand-600" />
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#86EFAC]/30 border-t-[#86EFAC]" />
                 <span>{buttonTextForStatus(activeStatus)}</span>
               </div>
               <span>{progress}%</span>
             </div>
-            <p className="mb-3 text-sm text-slate-600">{rotatingCopy}</p>
-            <div className="h-2 rounded-full bg-slate-200">
+            <p className="mb-3 text-sm text-slate-300">{rotatingCopy}</p>
+            <div className="h-2 rounded-full bg-white/10">
               <div
-                className="h-2 rounded-full bg-brand-600 transition-[width] duration-500 ease-out"
+                className="h-2 rounded-full bg-[#86EFAC] transition-[width] duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -406,10 +406,10 @@ export function DashboardBotManager({ initialBots }: { initialBots: BotRow[] }) 
                 const isActive = index === currentStageIndex && ACTIVE_STATUSES.includes(activeStatus);
                 const isDone = stageDone[index];
                 const tone = isDone
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  ? "border-[#86EFAC]/30 bg-[#86EFAC]/10 text-[#86EFAC]"
                   : isActive
-                    ? "border-brand-200 bg-brand-50 text-brand-700"
-                    : "border-slate-200 bg-white text-slate-400";
+                    ? "border-[#86EFAC]/30 bg-[#86EFAC]/10 text-[#86EFAC]"
+                    : "border-white/10 bg-white/5 text-slate-400";
 
                 return (
                   <span className={`flex items-center justify-center gap-1 rounded-md border px-1.5 py-1 ${tone}`} key={stage}>
@@ -422,22 +422,22 @@ export function DashboardBotManager({ initialBots }: { initialBots: BotRow[] }) 
           </div>
         ) : null}
 
-        {errorMessage ? <p className="mt-3 text-sm text-rose-600">{errorMessage}</p> : null}
+        {errorMessage ? <p className="mt-3 text-sm text-rose-400">{errorMessage}</p> : null}
       </form>
 
       <div className="card p-5">
-        <h2 className="mb-4 text-lg font-semibold">Your bots</h2>
+        <h2 className="mb-4 text-lg font-semibold text-white">Your bots</h2>
         <div className="space-y-3">
           {bots.map((bot) => {
             const status = bot.status.toUpperCase();
             const cardClass =
-              "block rounded-xl border border-slate-200 p-3 transition " +
-              (bot.status === "ready" ? "hover:bg-slate-50" : "bg-slate-50/70");
+              "block rounded-xl border border-white/10 bg-[#0B0F0D] p-3 transition " +
+              (bot.status === "ready" ? "hover:border-[#86EFAC]/40 hover:bg-[#111714]" : "opacity-90");
 
             const body = (
               <>
-                <p className="font-medium">{bot.name}</p>
-                <p className="mt-1 break-all text-xs text-slate-500">{bot.website_url}</p>
+                <p className="font-medium text-white">{bot.name}</p>
+                <p className="mt-1 break-all text-xs text-slate-400">{bot.website_url}</p>
                 <p className={`mt-2 text-xs uppercase tracking-wide ${statusTone(bot.status)}`}>{status}</p>
               </>
             );
@@ -456,7 +456,7 @@ export function DashboardBotManager({ initialBots }: { initialBots: BotRow[] }) 
               </Link>
             );
           })}
-          {bots.length === 0 ? <p className="text-sm text-slate-500">No bots yet. Create your first one.</p> : null}
+          {bots.length === 0 ? <p className="text-sm text-slate-400">No bots yet. Create your first one.</p> : null}
         </div>
       </div>
     </>

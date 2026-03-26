@@ -50,15 +50,15 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
   return (
     <div className="mb-6 card p-5">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Customize your chatbot</h2>
-        <p className="mt-1 text-sm text-slate-600">Adjust your widget look and welcome experience.</p>
+        <h2 className="text-lg font-semibold text-white">Customize your chatbot</h2>
+        <p className="mt-1 text-sm text-slate-400">Adjust your widget look and welcome experience.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Button Text</span>
+          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Button Text</span>
           <input
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-400"
+            className="w-full rounded-lg border border-white/10 bg-[#0B0F0D] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#86EFAC]/70 focus:ring-2 focus:ring-[#86EFAC]/20"
             maxLength={30}
             onChange={(event) => setField("buttonText", event.target.value)}
             type="text"
@@ -67,9 +67,9 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Button Color</span>
+          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Button Color</span>
           <input
-            className="h-10 w-full cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
+            className="h-10 w-full cursor-pointer rounded-lg border border-white/10 bg-[#0B0F0D] p-1"
             onChange={(event) => setField("buttonColor", event.target.value)}
             type="color"
             value={appearance.buttonColor}
@@ -77,9 +77,9 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Button Style</span>
+          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Button Style</span>
           <select
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-400"
+            className="w-full rounded-lg border border-white/10 bg-[#0B0F0D] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#86EFAC]/70 focus:ring-2 focus:ring-[#86EFAC]/20"
             onChange={(event) => setField("buttonStyle", event.target.value as BotAppearance["buttonStyle"])}
             value={appearance.buttonStyle}
           >
@@ -90,9 +90,9 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Widget Title</span>
+          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Widget Title</span>
           <input
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-400"
+            className="w-full rounded-lg border border-white/10 bg-[#0B0F0D] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#86EFAC]/70 focus:ring-2 focus:ring-[#86EFAC]/20"
             maxLength={60}
             onChange={(event) => setField("widgetTitle", event.target.value)}
             type="text"
@@ -101,9 +101,9 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Header Color</span>
+          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Header Color</span>
           <input
-            className="h-10 w-full cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
+            className="h-10 w-full cursor-pointer rounded-lg border border-white/10 bg-[#0B0F0D] p-1"
             onChange={(event) => setField("headerColor", event.target.value)}
             type="color"
             value={appearance.headerColor}
@@ -111,9 +111,9 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Position</span>
+          <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Position</span>
           <select
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-400"
+            className="w-full rounded-lg border border-white/10 bg-[#0B0F0D] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#86EFAC]/70 focus:ring-2 focus:ring-[#86EFAC]/20"
             onChange={(event) => setField("position", event.target.value as BotAppearance["position"])}
             value={appearance.position}
           >
@@ -124,9 +124,9 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
       </div>
 
       <label className="mt-4 block">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Welcome Message</span>
+        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">Welcome Message</span>
         <textarea
-          className="min-h-[100px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-brand-400"
+          className="min-h-[100px] w-full rounded-lg border border-white/10 bg-[#0B0F0D] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#86EFAC]/70 focus:ring-2 focus:ring-[#86EFAC]/20"
           maxLength={500}
           onChange={(event) => setField("welcomeMessage", event.target.value)}
           value={appearance.welcomeMessage}
@@ -137,8 +137,8 @@ export function BotCustomizationCard({ botId, initialAppearance }: Props) {
         <button className="btn-primary h-10 px-4 text-sm" disabled={saving} onClick={saveAppearance} type="button">
           {saving ? "Saving..." : "Save"}
         </button>
-        {saved ? <p className="text-sm text-emerald-600">Saved successfully</p> : null}
-        {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+        {saved ? <p className="text-sm text-[#86EFAC]">Saved successfully</p> : null}
+        {error ? <p className="text-sm text-rose-400">{error}</p> : null}
       </div>
     </div>
   );

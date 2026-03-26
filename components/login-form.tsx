@@ -32,8 +32,8 @@ export function LoginForm() {
 
   return (
     <form className="card mx-auto mt-10 max-w-md p-5 sm:mt-24 sm:p-6" onSubmit={onSubmit}>
-      <h1 className="mb-2 text-2xl font-semibold">Log in to SiteChat</h1>
-      <p className="mb-5 text-sm text-slate-600">Enter your email and we will send you a magic link.</p>
+      <h1 className="mb-2 text-2xl font-semibold text-white">Log in to SiteChat</h1>
+      <p className="mb-5 text-sm text-slate-400">Enter your email and we will send you a magic link.</p>
       <input
         type="email"
         required
@@ -45,7 +45,7 @@ export function LoginForm() {
       <button className="btn-primary mt-4 w-full" type="submit" disabled={loading}>
         {loading ? "Sending..." : "Send Magic Link"}
       </button>
-      {message ? <p className="mt-3 text-sm text-slate-600">{message}</p> : null}
+      {message ? <p className="mt-3 text-sm text-slate-300">{message}</p> : null}
     </form>
   );
 }

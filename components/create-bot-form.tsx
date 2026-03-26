@@ -39,7 +39,7 @@ export function CreateBotForm({ onCreated }: Props) {
 
   return (
     <form className="card p-5" onSubmit={submit}>
-      <h2 className="mb-4 text-lg font-semibold">Create chatbot</h2>
+      <h2 className="mb-4 text-lg font-semibold text-white">Create chatbot</h2>
       <div className="space-y-3">
         <input
           className="input"
@@ -60,7 +60,7 @@ export function CreateBotForm({ onCreated }: Props) {
       <button className="btn-primary mt-4" type="submit" disabled={loading}>
         {loading ? "Scraping + training..." : "Create chatbot"}
       </button>
-      {result ? <p className="mt-3 text-sm text-slate-600">{result}</p> : null}
+      {result ? <p className="mt-3 text-sm text-slate-300">{result}</p> : null}
     </form>
   );
 }
