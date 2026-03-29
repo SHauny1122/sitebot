@@ -2,7 +2,9 @@ export function Footer() {
   return (
     <footer className="border-t border-white/10 bg-[#0B0F0D] px-6 py-10">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <p className="text-sm font-semibold tracking-wide text-white">AutoChatbot</p>
+        <p className="text-sm font-bold tracking-tight text-white">
+          Auto<span className="text-[#F7C846] drop-shadow-[0_0_10px_rgba(247,200,70,0.25)]">Chatbot</span>
+        </p>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-400">
           <a className="transition hover:text-[#86EFAC]" href="/privacy-policy">

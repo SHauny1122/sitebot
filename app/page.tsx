@@ -4,6 +4,32 @@ import { getCurrentUser } from "@/lib/auth";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
+  const pricingPlans = [
+    {
+      id: "monthly",
+      name: "Starter Monthly",
+      price: "$9.99",
+      period: "/month",
+      description: "Chatbot training, customization, and script install included.",
+      cta: "Choose Monthly",
+      badge: null,
+      recommended: false,
+      savingsText: null,
+      checkoutHref: "#paystack-monthly-placeholder"
+    },
+    {
+      id: "yearly",
+      name: "Starter Yearly",
+      price: "$49",
+      period: "/year",
+      description: "Everything in Starter, with the best value yearly price.",
+      cta: "Choose Yearly",
+      badge: "Best Value",
+      recommended: true,
+      savingsText: "Save 59%",
+      checkoutHref: "#paystack-yearly-placeholder"
+    }
+  ] as const;
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-[#0B0F0D] text-white scroll-smooth scroll-pt-24">
@@ -126,17 +152,55 @@ export default async function HomePage() {
       <section className="relative scroll-mt-24 border-t border-white/5 px-6 py-16 md:py-24" id="pricing">
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <div className="max-w-6xl mx-auto">
-          <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-[#101513] p-6 text-center sm:p-8 md:p-12">
+          <div className="mx-auto max-w-5xl rounded-3xl border border-white/10 bg-[#101513] p-6 sm:p-8 md:p-10">
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-[#86EFAC]">Pricing</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">One simple plan</h2>
-            <p className="mt-3 text-sm text-gray-400 sm:text-base">Everything you need to launch and run your website chatbot.</p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Choose your plan</h2>
+            <p className="mt-3 max-w-2xl text-sm text-gray-400 sm:text-base">Simple pricing with flexible monthly or yearly billing for your chatbot launch.</p>
 
-            <div className="mt-8 rounded-2xl border border-white/10 bg-[#0B0F0D] p-6 sm:p-8">
-              <p className="text-lg font-semibold text-white">Starter</p>
-              <p className="mt-3 text-4xl font-semibold tracking-tight text-white">
-                $9.99<span className="text-lg text-gray-400">/month</span>
-              </p>
-              <p className="mt-4 text-sm text-gray-400">Chatbot training, customization, and script install included.</p>
+            <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-5">
+              {pricingPlans.map((plan) => (
+                <article
+                  className={`group relative flex h-full flex-col rounded-2xl border p-5 sm:p-6 transition duration-200 hover:-translate-y-0.5 ${
+                    plan.recommended
+                      ? "border-[#F7C846]/40 bg-[#121512] shadow-[0_12px_36px_-18px_rgba(247,200,70,0.35)]"
+                      : "border-white/10 bg-[#0B0F0D] hover:border-white/20"
+                  }`}
+                  key={plan.id}
+                >
+                  <div className="mb-4 flex items-start justify-between gap-3">
+                    <p className="text-base font-semibold text-white">{plan.name}</p>
+                    {plan.badge ? (
+                      <span className="rounded-full border border-[#F7C846]/40 bg-[#F7C846]/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#F7C846]">
+                        {plan.badge}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <p className="text-4xl font-semibold tracking-tight text-white">
+                    {plan.price}
+                    <span className="text-lg text-gray-400">{plan.period}</span>
+                  </p>
+
+                  {plan.savingsText ? <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-[#F7C846]">{plan.savingsText}</p> : null}
+
+                  <p className="mt-4 text-sm leading-relaxed text-gray-400">{plan.description}</p>
+
+                  <div className="mt-6 pt-2">
+                    {/* PAYSTACK HOOK: Replace `plan.checkoutHref` with your approved Paystack checkout URL for each plan. */}
+                    {/* PAYSTACK HOOK (alternative): Swap this anchor for an onClick handler that initializes Paystack inline checkout per plan. */}
+                    <a
+                      className={`inline-flex h-11 w-full items-center justify-center rounded-xl px-4 text-sm font-semibold transition ${
+                        plan.recommended
+                          ? "bg-[#F7C846] text-[#0B0F0D] hover:bg-[#f5d778]"
+                          : "border border-white/15 bg-white/5 text-white hover:border-white/25 hover:bg-white/10"
+                      }`}
+                      href={plan.checkoutHref}
+                    >
+                      {plan.cta}
+                    </a>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </div>
