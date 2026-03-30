@@ -133,13 +133,21 @@ export async function GET() {
       form.style.padding = '10px';
       form.style.borderTop = '1px solid #e2e8f0';
 
+      var inputClassName = 'sitechat-input-' + botId.replace(/[^a-zA-Z0-9_-]/g, '');
+      var styleTag = document.createElement('style');
+      styleTag.textContent = '.' + inputClassName + '::placeholder{color:#475569;opacity:1;}';
+      panel.appendChild(styleTag);
+
       var input = document.createElement('input');
       input.placeholder = 'Ask a question...';
+      input.className = inputClassName;
       input.style.flex = '1';
       input.style.height = '38px';
       input.style.padding = '0 10px';
       input.style.border = '1px solid #cbd5e1';
       input.style.borderRadius = '10px';
+      input.style.background = '#FFFFFF';
+      input.style.color = '#000000';
 
       var send = document.createElement('button');
       send.type = 'submit';
@@ -163,10 +171,11 @@ export async function GET() {
         bubble.style.lineHeight = '1.35';
         if (from === 'user') {
           bubble.style.marginLeft = 'auto';
-          bubble.style.background = appearance.buttonColor;
-          bubble.style.color = '#fff';
+          bubble.style.background = '#111111';
+          bubble.style.color = '#FFFFFF';
         } else {
-          bubble.style.background = '#fff';
+          bubble.style.background = '#FFFFFF';
+          bubble.style.color = '#000000';
           bubble.style.border = '1px solid #e2e8f0';
         }
         messages.appendChild(bubble);

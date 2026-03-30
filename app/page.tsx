@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Script from "next/script";
 import { Code2, Globe, SlidersHorizontal, Zap } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -279,6 +280,11 @@ export default async function HomePage() {
       </section>
 
       </div>
+      <Script
+        src="https://sitebot-kappa.vercel.app/embed.js"
+        data-bot="a499de6d-b945-4886-a924-cc3c27e9e609"
+        strategy="afterInteractive"
+      />
     </main>
   );
 }
