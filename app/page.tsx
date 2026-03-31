@@ -69,7 +69,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       callbackParams.set("plan", resolvedPlan);
     }
 
-    redirect(`/auth/callback?${callbackParams.toString()}` as Parameters<typeof redirect>[0]);
+    redirect(`/auth/complete?${callbackParams.toString()}` as Parameters<typeof redirect>[0]);
   }
 
   const user = await getCurrentUser();

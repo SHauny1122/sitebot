@@ -87,7 +87,7 @@ export function LoginForm() {
     setLoading(true);
     setMessage(null);
 
-    const callbackUrl = new URL("/auth/callback", clientEnv.NEXT_PUBLIC_SITE_URL);
+    const callbackUrl = new URL("/auth/complete", clientEnv.NEXT_PUBLIC_SITE_URL);
     if (intent) {
       callbackUrl.searchParams.set("intent", intent);
     }

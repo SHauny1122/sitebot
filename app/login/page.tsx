@@ -74,7 +74,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       callbackParams.set("plan", plan);
     }
 
-    redirect(`/auth/callback?${callbackParams.toString()}` as Parameters<typeof redirect>[0]);
+    redirect(`/auth/complete?${callbackParams.toString()}` as Parameters<typeof redirect>[0]);
   }
 
   const user = await getCurrentUser();
