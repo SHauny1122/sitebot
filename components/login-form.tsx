@@ -18,7 +18,14 @@ export function LoginForm() {
   const intent = searchParams.get("intent");
   const next = searchParams.get("next");
   const plan = searchParams.get("plan");
+  const authError = searchParams.get("auth_error");
   const checkoutPlan = isPlanId(plan) ? plan : null;
+
+  const authErrorMessage = authError === "otp_expired"
+    ? "Your magic link expired or was already used. Please request a new one below."
+    : authError
+      ? "We could not complete sign-in from that link. Please request a fresh magic link."
+      : null;
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,6 +63,9 @@ export function LoginForm() {
     <form className="card mx-auto mt-10 max-w-md p-5 sm:mt-24 sm:p-6" onSubmit={onSubmit}>
       <h1 className="mb-2 text-2xl font-semibold text-white">Log in to SiteChat</h1>
       <p className="mb-5 text-sm text-slate-400">Enter your email and we will send you a magic link.</p>
+      {authErrorMessage ? (
+        <p className="mb-4 rounded-lg border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">{authErrorMessage}</p>
+      ) : null}
       {intent === "checkout" ? (
         <p className="mb-4 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">
           Please log in to continue your purchase{checkoutPlan ? ` (${checkoutPlan === "monthly" ? "Starter Monthly" : "Starter Yearly"})` : ""}.

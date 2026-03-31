@@ -22,9 +22,33 @@ function getSingleQueryValue(value: string | string[] | undefined) {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const code = getSingleQueryValue(params?.code);
+  const tokenHash = getSingleQueryValue(params?.token_hash);
+  const otpType = getSingleQueryValue(params?.type);
+  const authError = getSingleQueryValue(params?.error);
+  const authErrorCode = getSingleQueryValue(params?.error_code);
+  const authErrorDescription = getSingleQueryValue(params?.error_description);
 
-  if (code) {
-    const callbackParams = new URLSearchParams({ code });
+  if (code || tokenHash || authError || authErrorCode) {
+    const callbackParams = new URLSearchParams();
+    if (code) {
+      callbackParams.set("code", code);
+    }
+    if (tokenHash) {
+      callbackParams.set("token_hash", tokenHash);
+    }
+    if (otpType) {
+      callbackParams.set("type", otpType);
+    }
+    if (authError) {
+      callbackParams.set("error", authError);
+    }
+    if (authErrorCode) {
+      callbackParams.set("error_code", authErrorCode);
+    }
+    if (authErrorDescription) {
+      callbackParams.set("error_description", authErrorDescription);
+    }
+
     const intent = getSingleQueryValue(params?.intent);
     const next = getSingleQueryValue(params?.next);
     const plan = getSingleQueryValue(params?.plan);
