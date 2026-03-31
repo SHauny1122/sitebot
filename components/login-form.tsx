@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { clientEnv } from "@/lib/env-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -9,11 +9,39 @@ function isPlanId(value: string | null): value is "monthly" | "yearly" {
   return value === "monthly" || value === "yearly";
 }
 
+function getSafeRedirectPath(value: string | null) {
+  if (!value) {
+    return "/dashboard";
+  }
+
+  if (!value.startsWith("/") || value.startsWith("//")) {
+    return "/#pricing";
+  }
+
+  return value;
+}
+
+function getPostLoginPath(intent: string | null, next: string | null, plan: string | null) {
+  const safeNextPath = getSafeRedirectPath(next);
+  if (intent !== "checkout") {
+    return safeNextPath;
+  }
+
+  const url = new URL(safeNextPath, "http://localhost");
+  url.searchParams.set("checkout", "1");
+  if (isPlanId(plan)) {
+    url.searchParams.set("plan", plan);
+  }
+
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   const intent = searchParams.get("intent");
   const next = searchParams.get("next");
@@ -27,12 +55,38 @@ export function LoginForm() {
       ? "We could not complete sign-in from that link. Please request a fresh magic link."
       : null;
 
+  useEffect(() => {
+    let active = true;
+    const postLoginPath = getPostLoginPath(intent, next, plan);
+
+    async function resumeSessionIfAvailable() {
+      const { data } = await supabase.auth.getSession();
+      if (!active) return;
+
+      if (data.session) {
+        window.location.replace(postLoginPath);
+      }
+    }
+
+    void resumeSessionIfAvailable();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        window.location.replace(postLoginPath);
+      }
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, [intent, next, plan, supabase]);
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
 
-    const supabase = createSupabaseBrowserClient();
     const callbackUrl = new URL("/auth/callback", clientEnv.NEXT_PUBLIC_SITE_URL);
     if (intent) {
       callbackUrl.searchParams.set("intent", intent);
