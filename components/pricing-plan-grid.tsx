@@ -58,6 +58,12 @@ export function PricingPlanGrid({ isAuthenticated, plans }: { isAuthenticated: b
     setInfoMessage(null);
     setErrorMessage(null);
 
+    console.info("[pricing] Checkout initialization requested", {
+      route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+      plan: plan.id,
+      isAuthenticated
+    });
+
     if (!isAuthenticated) {
       const returnTo = getReturnToWithCheckoutIntent(plan.id);
       persistCheckoutIntent(plan.id, returnTo);
@@ -67,6 +73,11 @@ export function PricingPlanGrid({ isAuthenticated, plans }: { isAuthenticated: b
       loginUrl.searchParams.set("intent", "checkout");
       loginUrl.searchParams.set("plan", plan.id);
       loginUrl.searchParams.set("next", returnTo);
+      console.info("[pricing] Checkout intent detected; redirecting to login", {
+        route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+        plan: plan.id,
+        next: returnTo
+      });
       window.location.assign(`${loginUrl.pathname}${loginUrl.search}`);
       return;
     }
@@ -79,6 +90,12 @@ export function PricingPlanGrid({ isAuthenticated, plans }: { isAuthenticated: b
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ plan: plan.id })
+      });
+
+      console.info("[pricing] Paystack initialize call fired", {
+        route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+        plan: plan.id,
+        status: response.status
       });
 
       const data = (await response.json()) as InitializeResponse;
@@ -105,6 +122,12 @@ export function PricingPlanGrid({ isAuthenticated, plans }: { isAuthenticated: b
     const currentUrl = new URL(window.location.href);
     const checkoutParam = currentUrl.searchParams.get("checkout");
     const planParam = currentUrl.searchParams.get("plan");
+
+    console.info("[pricing] Post-login landing route", {
+      route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+      checkoutIntentDetected: checkoutParam === "1",
+      plan: planParam
+    });
 
     if (checkoutParam === "1" && isPricingPlanId(planParam)) {
       const matchedPlan = plans.find((plan) => plan.id === planParam);

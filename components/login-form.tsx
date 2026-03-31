@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { clientEnv } from "@/lib/env-client";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
+const CHECKOUT_INTENT_KEY = "sitechat.checkout.intent";
+
 function isPlanId(value: string | null): value is "monthly" | "yearly" {
   return value === "monthly" || value === "yearly";
 }
@@ -22,7 +24,7 @@ function getSafeRedirectPath(value: string | null) {
 }
 
 function getPostLoginPath(intent: string | null, next: string | null, plan: string | null) {
-  const safeNextPath = getSafeRedirectPath(next);
+  const safeNextPath = intent === "checkout" ? getSafeRedirectPath(next ?? "/#pricing") : getSafeRedirectPath(next);
   if (intent !== "checkout") {
     return safeNextPath;
   }
@@ -34,6 +36,18 @@ function getPostLoginPath(intent: string | null, next: string | null, plan: stri
   }
 
   return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function persistCheckoutIntent(plan: "monthly" | "yearly", returnTo: string) {
+  window.sessionStorage.setItem(
+    CHECKOUT_INTENT_KEY,
+    JSON.stringify({
+      intent: "checkout",
+      plan,
+      returnTo,
+      createdAt: Date.now()
+    })
+  );
 }
 
 export function LoginForm() {
@@ -88,6 +102,17 @@ export function LoginForm() {
     setMessage(null);
 
     const callbackUrl = new URL("/auth/complete", clientEnv.NEXT_PUBLIC_SITE_URL);
+    const checkoutReturnTo = getPostLoginPath(intent, next, checkoutPlan);
+
+    if (intent === "checkout" && checkoutPlan) {
+      persistCheckoutIntent(checkoutPlan, checkoutReturnTo);
+      console.info("[login] Checkout intent stored before magic link", {
+        route: `${window.location.pathname}${window.location.search}`,
+        plan: checkoutPlan,
+        returnTo: checkoutReturnTo
+      });
+    }
+
     if (intent) {
       callbackUrl.searchParams.set("intent", intent);
     }

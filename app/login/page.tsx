@@ -81,7 +81,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   if (user) {
     const intent = getSingleQueryValue(params?.intent);
     const requestedPlan = getSingleQueryValue(params?.plan);
-    const nextPath = getSafeRedirectPath(getSingleQueryValue(params?.next));
+    const nextPath = intent === "checkout" ? getSafeRedirectPath(getSingleQueryValue(params?.next) ?? "/#pricing") : getSafeRedirectPath(getSingleQueryValue(params?.next));
 
     if (intent === "checkout") {
       const redirectUrl = new URL(nextPath, "http://localhost");

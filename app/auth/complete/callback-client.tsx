@@ -6,6 +6,14 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type AuthState = "signing_in" | "failed";
 type OtpType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
+const CHECKOUT_INTENT_KEY = "sitechat.checkout.intent";
+
+type StoredCheckoutIntent = {
+  intent?: string;
+  plan?: string;
+  returnTo?: string;
+  createdAt?: number;
+};
 
 function isOtpType(value: string | null): value is OtpType {
   return value === "signup" || value === "invite" || value === "magiclink" || value === "recovery" || value === "email_change" || value === "email";
@@ -59,6 +67,32 @@ function getLoginFallbackPath(intent: string | null, next: string | null, plan: 
   return `${loginUrl.pathname}${loginUrl.search}${loginUrl.hash}`;
 }
 
+function getStoredCheckoutIntent() {
+  const storedRaw = window.sessionStorage.getItem(CHECKOUT_INTENT_KEY);
+  if (!storedRaw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(storedRaw) as StoredCheckoutIntent;
+    const intent = parsed.intent === "checkout" ? "checkout" : null;
+    const plan = isPlanId(parsed.plan ?? null) ? parsed.plan : null;
+    const next = parsed.returnTo && parsed.returnTo.startsWith("/") && !parsed.returnTo.startsWith("//") ? parsed.returnTo : null;
+
+    if (!intent && !plan && !next) {
+      return null;
+    }
+
+    return {
+      intent,
+      plan,
+      next
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function AuthCompleteClient() {
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -76,8 +110,19 @@ export function AuthCompleteClient() {
 
   useEffect(() => {
     let active = true;
-    const postLoginPath = getPostLoginPath(intent, next, plan);
-    const loginFallbackPath = getLoginFallbackPath(intent, next, plan, errorCode);
+    const storedIntent = getStoredCheckoutIntent();
+    const resolvedIntent = intent ?? storedIntent?.intent ?? null;
+    const resolvedPlan = isPlanId(plan) ? plan : storedIntent?.plan ?? null;
+    const resolvedNext = next ?? storedIntent?.next ?? null;
+    const postLoginPath = getPostLoginPath(resolvedIntent, resolvedNext, resolvedPlan);
+    const loginFallbackPath = getLoginFallbackPath(resolvedIntent, resolvedNext, resolvedPlan, errorCode);
+
+    console.info("[auth/complete] Callback route landed", {
+      route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+      checkoutIntentDetected: resolvedIntent === "checkout",
+      plan: resolvedPlan,
+      next: resolvedNext
+    });
 
     const redirectIfSessionReady = async () => {
       for (let attempt = 0; attempt < 6; attempt += 1) {
@@ -85,6 +130,11 @@ export function AuthCompleteClient() {
         if (!active) return true;
 
         if (data.session) {
+          console.info("[auth/complete] Session ready; redirecting", {
+            route: `${window.location.pathname}${window.location.search}`,
+            checkoutIntentDetected: resolvedIntent === "checkout",
+            postLoginPath
+          });
           window.location.replace(postLoginPath);
           return true;
         }
@@ -137,6 +187,11 @@ export function AuthCompleteClient() {
         return;
       }
 
+      console.info("[auth/complete] Auth completed; redirecting", {
+        route: `${window.location.pathname}${window.location.search}`,
+        checkoutIntentDetected: resolvedIntent === "checkout",
+        postLoginPath
+      });
       window.location.replace(postLoginPath);
     };
 
@@ -146,6 +201,11 @@ export function AuthCompleteClient() {
       if (!active || !session) {
         return;
       }
+      console.info("[auth/complete] Auth state changed to signed-in; redirecting", {
+        route: `${window.location.pathname}${window.location.search}`,
+        checkoutIntentDetected: resolvedIntent === "checkout",
+        postLoginPath
+      });
       window.location.replace(postLoginPath);
     });
 
