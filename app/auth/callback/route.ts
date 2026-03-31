@@ -1,9 +1,22 @@
-import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { isPaystackPlanId } from "@/lib/paystack";
 
 type OtpType = "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email";
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: {
+    domain?: string;
+    expires?: Date;
+    httpOnly?: boolean;
+    maxAge?: number;
+    path?: string;
+    sameSite?: "lax" | "strict" | "none";
+    secure?: boolean;
+  };
+};
 
 function getSafeRedirectPath(value: string | null) {
   if (!value) {
@@ -17,7 +30,7 @@ function getSafeRedirectPath(value: string | null) {
   return value;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
@@ -51,9 +64,19 @@ export async function GET(request: Request) {
   }
 
   let authSucceeded = false;
+  const pendingCookies: CookieToSet[] = [];
 
   if (code || (tokenHash && otpType)) {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(items: CookieToSet[]) {
+          pendingCookies.push(...items);
+        }
+      }
+    });
 
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -86,5 +109,9 @@ export async function GET(request: Request) {
     return NextResponse.redirect(loginUrl.toString());
   }
 
-  return NextResponse.redirect(redirectUrl.toString());
+  const response = NextResponse.redirect(redirectUrl.toString());
+  pendingCookies.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options);
+  });
+  return response;
 }
