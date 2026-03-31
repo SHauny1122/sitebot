@@ -1,9 +1,53 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import Script from "next/script";
 import { Code2, Globe, SlidersHorizontal, Zap } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { PricingPlanGrid } from "@/components/pricing-plan-grid";
 
-export default async function HomePage() {
+type HomePageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function getSingleQueryValue(value: string | string[] | undefined) {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+  return null;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const code = getSingleQueryValue(params?.code);
+
+  if (code) {
+    const callbackParams = new URLSearchParams({ code });
+    const intent = getSingleQueryValue(params?.intent);
+    const next = getSingleQueryValue(params?.next);
+    const plan = getSingleQueryValue(params?.plan);
+
+    const hasLegacyMonthlyPlaceholder = params && Object.prototype.hasOwnProperty.call(params, "paystack-monthly-placeholder");
+    const hasLegacyYearlyPlaceholder = params && Object.prototype.hasOwnProperty.call(params, "paystack-yearly-placeholder");
+
+    const resolvedIntent = intent ?? (hasLegacyMonthlyPlaceholder || hasLegacyYearlyPlaceholder ? "checkout" : null);
+    const resolvedPlan = plan ?? (hasLegacyYearlyPlaceholder ? "yearly" : hasLegacyMonthlyPlaceholder ? "monthly" : null);
+
+    if (resolvedIntent) {
+      callbackParams.set("intent", resolvedIntent);
+    }
+    if (next?.startsWith("/") && !next.startsWith("//")) {
+      callbackParams.set("next", next);
+    }
+    if (resolvedPlan === "monthly" || resolvedPlan === "yearly") {
+      callbackParams.set("plan", resolvedPlan);
+    }
+
+    redirect(`/auth/callback?${callbackParams.toString()}` as Parameters<typeof redirect>[0]);
+  }
+
   const user = await getCurrentUser();
   const pricingPlans = [
     {
@@ -15,8 +59,7 @@ export default async function HomePage() {
       cta: "Choose Monthly",
       badge: null,
       recommended: false,
-      savingsText: null,
-      checkoutHref: "#paystack-monthly-placeholder"
+      savingsText: null
     },
     {
       id: "yearly",
@@ -27,8 +70,7 @@ export default async function HomePage() {
       cta: "Choose Yearly",
       badge: "Best Value",
       recommended: true,
-      savingsText: "Save 59%",
-      checkoutHref: "#paystack-yearly-placeholder"
+      savingsText: "Save 59%"
     }
   ] as const;
 
@@ -158,51 +200,10 @@ export default async function HomePage() {
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Choose your plan</h2>
             <p className="mt-3 max-w-2xl text-sm text-gray-400 sm:text-base">Simple pricing with flexible monthly or yearly billing for your chatbot launch.</p>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-5">
-              {pricingPlans.map((plan) => (
-                <article
-                  className={`group relative flex h-full flex-col rounded-2xl border p-5 sm:p-6 transition duration-200 hover:-translate-y-0.5 ${
-                    plan.recommended
-                      ? "border-[#F7C846]/40 bg-[#121512] shadow-[0_12px_36px_-18px_rgba(247,200,70,0.35)]"
-                      : "border-white/10 bg-[#0B0F0D] hover:border-white/20"
-                  }`}
-                  key={plan.id}
-                >
-                  <div className="mb-4 flex items-start justify-between gap-3">
-                    <p className="text-base font-semibold text-white">{plan.name}</p>
-                    {plan.badge ? (
-                      <span className="rounded-full border border-[#F7C846]/40 bg-[#F7C846]/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#F7C846]">
-                        {plan.badge}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <p className="text-4xl font-semibold tracking-tight text-white">
-                    {plan.price}
-                    <span className="text-lg text-gray-400">{plan.period}</span>
-                  </p>
-
-                  {plan.savingsText ? <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-[#F7C846]">{plan.savingsText}</p> : null}
-
-                  <p className="mt-4 text-sm leading-relaxed text-gray-400">{plan.description}</p>
-
-                  <div className="mt-6 pt-2">
-                    {/* PAYSTACK HOOK: Replace `plan.checkoutHref` with your approved Paystack checkout URL for each plan. */}
-                    {/* PAYSTACK HOOK (alternative): Swap this anchor for an onClick handler that initializes Paystack inline checkout per plan. */}
-                    <a
-                      className={`inline-flex h-11 w-full items-center justify-center rounded-xl px-4 text-sm font-semibold transition ${
-                        plan.recommended
-                          ? "bg-[#F7C846] text-[#0B0F0D] hover:bg-[#f5d778]"
-                          : "border border-white/15 bg-white/5 text-white hover:border-white/25 hover:bg-white/10"
-                      }`}
-                      href={plan.checkoutHref}
-                    >
-                      {plan.cta}
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <PricingPlanGrid
+              isAuthenticated={Boolean(user)}
+              plans={pricingPlans}
+            />
           </div>
         </div>
       </section>
