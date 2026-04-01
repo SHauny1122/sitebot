@@ -167,6 +167,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
             </div>
           </section>
+
+          <section className="used-by-ticker mt-5 sm:mt-6" aria-label="Used by companies">
+            <div className="used-by-ticker__track">
+              <div className="used-by-ticker__group" aria-hidden="true">
+                <span className="used-by-ticker__item">ITworks</span>
+                <span className="used-by-ticker__divider">•</span>
+                <span className="used-by-ticker__item">Flipworks</span>
+                <span className="used-by-ticker__divider">•</span>
+                <span className="used-by-ticker__item">AutoChatbot</span>
+                <span className="used-by-ticker__divider">•</span>
+              </div>
+              <div className="used-by-ticker__group" aria-hidden="true">
+                <span className="used-by-ticker__item">ITworks</span>
+                <span className="used-by-ticker__divider">•</span>
+                <span className="used-by-ticker__item">Flipworks</span>
+                <span className="used-by-ticker__divider">•</span>
+                <span className="used-by-ticker__item">AutoChatbot</span>
+                <span className="used-by-ticker__divider">•</span>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 
