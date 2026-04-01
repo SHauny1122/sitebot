@@ -283,22 +283,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 Let your chatbot answer questions, capture leads, and support your visitors — automatically.
               </p>
 
-              <div className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+              <div className="mt-10 flex w-full items-center justify-center">
                 <Link
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#9AF4B6] px-7 text-lg font-semibold text-[#0B0F0D] transition hover:bg-[#86EFAC] hover:shadow-[0_0_20px_rgba(134,239,172,0.6)] sm:w-auto sm:min-w-[220px]"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#9AF4B6] px-7 text-lg font-semibold text-[#0B0F0D] transition hover:bg-[#86EFAC] hover:shadow-[0_0_20px_rgba(134,239,172,0.6)] sm:w-auto sm:min-w-[240px]"
                   href={user ? "/dashboard" : "/login"}
                 >
                   Get Started Free
                 </Link>
-                <Link
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-7 text-lg font-semibold text-white transition hover:border-white/20 hover:bg-white/10 sm:w-auto sm:min-w-[220px]"
-                  href={user ? "/dashboard" : "/login"}
-                >
-                  Book a Demo
-                </Link>
               </div>
-
-              <p className="mt-8 text-sm text-gray-500">No credit card required. 14-day free trial.</p>
             </div>
           </div>
         </div>
