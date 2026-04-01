@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DashboardBotManager } from "@/components/dashboard-bot-manager";
 import { LogoutButton } from "@/components/logout-button";
+import { SubscriptionCard } from "@/components/subscription-card";
 import { requireUser } from "@/lib/auth";
 import { FREE_MESSAGE_LIMIT } from "@/lib/pricing";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -52,6 +53,10 @@ export default async function DashboardPage() {
             {plan === "free" ? ` / ${FREE_MESSAGE_LIMIT}` : ""}
           </p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <SubscriptionCard initialPlan={plan} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

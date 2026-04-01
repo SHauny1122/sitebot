@@ -17,11 +17,28 @@ type PaystackVerifyResponse = {
     currency: string;
     status: string;
     metadata?: Record<string, unknown>;
+    subscription?: {
+      subscription_code?: string;
+      email_token?: string;
+      next_payment_date?: string;
+      status?: string;
+    };
+    subscriptions?: {
+      subscription_code?: string;
+      email_token?: string;
+      next_payment_date?: string;
+      status?: string;
+    }[];
     customer?: {
       email?: string;
+      customer_code?: string;
     };
   };
 };
+
+function isMissingColumnError(message: string) {
+  return /column .* does not exist/i.test(message);
+}
 
 export async function POST(request: Request) {
   const parsed = payloadSchema.safeParse(await request.json());
@@ -65,6 +82,19 @@ export async function POST(request: Request) {
 
   const expectedPlan = PAYSTACK_PLANS[metadataPlan];
   const normalizedCurrency = (verifyData.data.currency || "").toUpperCase();
+  const subscriptionFromResponse = verifyData.data.subscription ?? verifyData.data.subscriptions?.[0] ?? null;
+
+  const profileUpdatePayload = {
+    user_id: userId,
+    email: verifyData.data.customer?.email ?? null,
+    plan: "pro",
+    paystack_plan_id: expectedPlan.id,
+    paystack_customer_code: verifyData.data.customer?.customer_code ?? null,
+    paystack_subscription_status: subscriptionFromResponse?.status ?? "active",
+    paystack_subscription_code: subscriptionFromResponse?.subscription_code ?? null,
+    paystack_email_token: subscriptionFromResponse?.email_token ?? null,
+    paystack_next_billing_date: subscriptionFromResponse?.next_payment_date ?? null
+  };
 
   if (verifyData.data.status !== "success") {
     return NextResponse.json({ error: "Payment is not successful.", status: verifyData.data.status }, { status: 400 });
@@ -74,14 +104,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payment amount or currency does not match selected plan." }, { status: 400 });
   }
 
-  const { error: updateError } = await supabaseAdmin.from("profiles").upsert(
-    {
-      user_id: userId,
-      email: verifyData.data.customer?.email ?? null,
-      plan: "pro"
-    },
-    { onConflict: "user_id" }
-  );
+  const { error: initialUpdateError } = await supabaseAdmin.from("profiles").upsert(profileUpdatePayload, { onConflict: "user_id" });
+
+  let updateError = initialUpdateError;
+
+  if (initialUpdateError && isMissingColumnError(initialUpdateError.message)) {
+    const { error: fallbackError } = await supabaseAdmin.from("profiles").upsert(
+      {
+        user_id: userId,
+        email: verifyData.data.customer?.email ?? null,
+        plan: "pro"
+      },
+      { onConflict: "user_id" }
+    );
+    updateError = fallbackError;
+  }
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
