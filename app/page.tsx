@@ -97,6 +97,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       savingsText: "Save 59%"
     }
   ] as const;
+  const usedByNames = ["Flipworks", "AutoChatbot", "ITworks"] as const;
+  const usedBySequence = [...usedByNames, ...usedByNames, ...usedByNames];
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-[#0B0F0D] text-white scroll-smooth scroll-pt-24">
@@ -171,18 +173,20 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <section className="used-by-ticker mt-5 sm:mt-6" aria-label="Used by companies">
             <div className="used-by-ticker__track">
               <div className="used-by-ticker__group" aria-hidden="true">
-                <span className="used-by-ticker__item">ITworks</span>
-                <span className="used-by-ticker__divider">•</span>
-                <span className="used-by-ticker__item">Flipworks</span>
-                <span className="used-by-ticker__divider">•</span>
-                <span className="used-by-ticker__item">AutoChatbot</span>
+                {usedBySequence.map((name, index) => (
+                  <span key={`ticker-a-${name}-${index}`} className="used-by-ticker__cell">
+                    <span className="used-by-ticker__item">{name}</span>
+                    {index < usedBySequence.length - 1 ? <span className="used-by-ticker__divider">•</span> : null}
+                  </span>
+                ))}
               </div>
               <div className="used-by-ticker__group" aria-hidden="true">
-                <span className="used-by-ticker__item">ITworks</span>
-                <span className="used-by-ticker__divider">•</span>
-                <span className="used-by-ticker__item">Flipworks</span>
-                <span className="used-by-ticker__divider">•</span>
-                <span className="used-by-ticker__item">AutoChatbot</span>
+                {usedBySequence.map((name, index) => (
+                  <span key={`ticker-b-${name}-${index}`} className="used-by-ticker__cell">
+                    <span className="used-by-ticker__item">{name}</span>
+                    {index < usedBySequence.length - 1 ? <span className="used-by-ticker__divider">•</span> : null}
+                  </span>
+                ))}
               </div>
             </div>
           </section>
