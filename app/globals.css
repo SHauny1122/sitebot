@@ -74,8 +74,8 @@ body {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 1.1rem;
-  padding: 0.8rem 1.1rem;
+  gap: 1.85rem;
+  padding-block: 0.8rem;
 }
 
 .used-by-ticker__item,
@@ -110,7 +110,7 @@ body {
   }
 
   .used-by-ticker__group {
-    gap: 0.8rem;
+    gap: 1.2rem;
     padding-block: 0.7rem;
   }
 

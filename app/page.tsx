@@ -176,7 +176,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="used-by-ticker__item">Flipworks</span>
                 <span className="used-by-ticker__divider">•</span>
                 <span className="used-by-ticker__item">AutoChatbot</span>
-                <span className="used-by-ticker__divider">•</span>
               </div>
               <div className="used-by-ticker__group" aria-hidden="true">
                 <span className="used-by-ticker__item">ITworks</span>
@@ -184,7 +183,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="used-by-ticker__item">Flipworks</span>
                 <span className="used-by-ticker__divider">•</span>
                 <span className="used-by-ticker__item">AutoChatbot</span>
-                <span className="used-by-ticker__divider">•</span>
               </div>
             </div>
           </section>
