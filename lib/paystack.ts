@@ -5,7 +5,7 @@ export type PaystackPlanConfig = {
   name: string;
   amountDisplay: string;
   amountMinor: number;
-  currency: "USD";
+  currency: "ZAR";
   intervalLabel: string;
 };
 
@@ -13,17 +13,17 @@ export const PAYSTACK_PLANS: Record<PaystackPlanId, PaystackPlanConfig> = {
   monthly: {
     id: "monthly",
     name: "Starter Monthly",
-    amountDisplay: "$9.99",
-    amountMinor: 999,
-    currency: "USD",
+    amountDisplay: "R169.99",
+    amountMinor: 16999,
+    currency: "ZAR",
     intervalLabel: "month"
   },
   yearly: {
     id: "yearly",
     name: "Starter Yearly",
-    amountDisplay: "$49",
-    amountMinor: 4900,
-    currency: "USD",
+    amountDisplay: "R829.99",
+    amountMinor: 82999,
+    currency: "ZAR",
     intervalLabel: "year"
   }
 };

@@ -77,7 +77,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     {
       id: "monthly",
       name: "Starter Monthly",
-      price: "$9.99",
+      price: "R169.99",
       period: "/month",
       description: "Chatbot training, customization, and script install included.",
       cta: "Choose Monthly",
@@ -88,7 +88,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     {
       id: "yearly",
       name: "Starter Yearly",
-      price: "$49",
+      price: "R829.99",
       period: "/year",
       description: "Everything in Starter, with the best value yearly price.",
       cta: "Choose Yearly",
