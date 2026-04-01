@@ -54,16 +54,41 @@ export async function POST(request: Request) {
 
   const plan = PAYSTACK_PLANS[planId];
   const reference = `sitechat_${plan.id}_${crypto.randomUUID()}`;
+  const initializeCurrency = "ZAR";
 
   console.info("[paystack/initialize] Initializing transaction", {
     userId: user.id,
     email: user.email,
     plan: plan.id,
     amountMinor: plan.amountMinor,
-    currency: plan.currency
+    currency: initializeCurrency
   });
 
   const callbackUrl = `${env.NEXT_PUBLIC_SITE_URL}/payment/callback?plan=${encodeURIComponent(plan.id)}`;
+
+  const initializePayload = {
+    email: user.email,
+    amount: plan.amountMinor,
+    currency: initializeCurrency,
+    reference,
+    callback_url: callbackUrl,
+    metadata: {
+      planId: plan.id,
+      userId: user.id,
+      planName: plan.name,
+      interval: plan.intervalLabel,
+      amountMinor: plan.amountMinor,
+      currency: initializeCurrency
+    }
+  };
+
+  console.info("[paystack/initialize] Request payload", {
+    email: initializePayload.email,
+    amount: initializePayload.amount,
+    currency: initializePayload.currency,
+    callback_url: initializePayload.callback_url,
+    reference: initializePayload.reference
+  });
 
   const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
@@ -71,21 +96,7 @@ export async function POST(request: Request) {
       Authorization: `Bearer ${secretKey}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      email: user.email,
-      amount: plan.amountMinor,
-      currency: plan.currency,
-      reference,
-      callback_url: callbackUrl,
-      metadata: {
-        planId: plan.id,
-        userId: user.id,
-        planName: plan.name,
-        interval: plan.intervalLabel,
-        amountMinor: plan.amountMinor,
-        currency: plan.currency
-      }
-    })
+    body: JSON.stringify(initializePayload)
   });
 
   const paystackData = (await paystackResponse.json()) as PaystackInitializeResponse;
@@ -95,11 +106,27 @@ export async function POST(request: Request) {
       userId: user.id,
       plan: plan.id,
       status: paystackResponse.status,
-      message: paystackData.message
+      message: paystackData.message,
+      currency: initializeCurrency
     });
+
+    const responseStatus = paystackResponse.status >= 400 ? paystackResponse.status : 502;
+
     return NextResponse.json(
-      { error: paystackData.message || "Failed to initialize payment." },
-      { status: 502 }
+      {
+        error: paystackData.message || "Failed to initialize payment.",
+        details: {
+          paystackHttpStatus: paystackResponse.status,
+          paystackStatus: paystackData.status,
+          paystackMessage: paystackData.message,
+          plan: plan.id,
+          amount: plan.amountMinor,
+          currency: initializeCurrency,
+          callbackUrl,
+          reference
+        }
+      },
+      { status: responseStatus }
     );
   }
 
