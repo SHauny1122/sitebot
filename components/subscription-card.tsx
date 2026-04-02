@@ -207,9 +207,9 @@ export function SubscriptionCard({ initialPlan }: { initialPlan: "free" | "pro" 
         <p className="mt-4 rounded-lg border border-white/10 bg-[#0B0F0D] px-3 py-2 text-sm text-slate-300">No active subscription found.</p>
       ) : null}
 
-      {!loading && subscription && !subscription.hasPaystackMetadata ? (
+      {!loading && subscription?.missingMetadataReason ? (
         <p className="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
-          {subscription.missingMetadataReason ?? "Missing Paystack metadata for self-service management."}
+          {subscription.missingMetadataReason}
         </p>
       ) : null}
 
@@ -221,24 +221,28 @@ export function SubscriptionCard({ initialPlan }: { initialPlan: "free" | "pro" 
         <p className="mt-4 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">{notice}</p>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          className="btn-secondary"
-          disabled={Boolean(busyAction) || loading || noActiveSubscription}
-          onClick={() => void handleCancel()}
-          type="button"
-        >
-          {busyAction === "cancel" ? "Cancelling..." : "Cancel Subscription"}
-        </button>
-        <button
-          className="btn-primary"
-          disabled={Boolean(busyAction) || loading || noActiveSubscription}
-          onClick={() => void handleManage()}
-          type="button"
-        >
-          {busyAction === "manage" ? "Opening..." : "Manage Subscription"}
-        </button>
-      </div>
+      {noActiveSubscription ? (
+        <p className="mt-5 text-sm text-slate-400">Manage and cancel actions are unavailable because there is no active Paystack subscription on this account.</p>
+      ) : (
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            className="btn-secondary"
+            disabled={Boolean(busyAction) || loading}
+            onClick={() => void handleCancel()}
+            type="button"
+          >
+            {busyAction === "cancel" ? "Cancelling..." : "Cancel Subscription"}
+          </button>
+          <button
+            className="btn-primary"
+            disabled={Boolean(busyAction) || loading}
+            onClick={() => void handleManage()}
+            type="button"
+          >
+            {busyAction === "manage" ? "Opening..." : "Manage Subscription"}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
