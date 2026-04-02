@@ -205,8 +205,15 @@ async function recoverSubscriptionMetadata(
 
   if (recoveredSubscription?.status) {
     patch.paystack_subscription_status = recoveredSubscription.status;
-  } else if (!profile.paystack_subscription_status) {
-    patch.paystack_subscription_status = "active";
+  } else if (!profile.paystack_subscription_code && !profile.paystack_email_token) {
+    const normalizedStatus = (profile.paystack_subscription_status ?? "").trim().toLowerCase();
+    if (normalizedStatus && normalizedStatus !== "none" && normalizedStatus !== "cancelled") {
+      patch.paystack_subscription_status = "none";
+    }
+
+    if (profile.paystack_next_billing_date) {
+      patch.paystack_next_billing_date = null;
+    }
   }
 
   if (Object.keys(patch).length === 0) {
@@ -267,14 +274,17 @@ async function getProfileSubscription(userId: string) {
 }
 
 function getSubscriptionSummary(profile: ProfileSubscriptionRow | null, hasExtendedColumns: boolean) {
-  const plan = profile?.paystack_plan_id ?? profile?.plan ?? "free";
-  const status = profile?.paystack_subscription_status ?? (plan === "free" ? "none" : "active");
-  const nextBillingDate = profile?.paystack_next_billing_date ?? null;
+  const rawPlan = profile?.paystack_plan_id ?? profile?.plan ?? "free";
   const subscriptionCode = profile?.paystack_subscription_code ?? null;
   const emailToken = profile?.paystack_email_token ?? null;
+  const hasRealSubscription = Boolean(subscriptionCode && emailToken);
+  const plan = hasRealSubscription ? rawPlan : "free";
+  const status = hasRealSubscription ? profile?.paystack_subscription_status ?? "active" : "none";
+  const nextBillingDate = profile?.paystack_next_billing_date ?? null;
   const customerCode = profile?.paystack_customer_code ?? null;
-  const canManageHosted = Boolean(subscriptionCode && emailToken);
-  const directCancelSupported = Boolean(subscriptionCode && emailToken);
+  const canManageHosted = hasRealSubscription;
+  const directCancelSupported = hasRealSubscription;
+  const showMissingMetadataWarning = hasExtendedColumns && Boolean(rawPlan !== "free" && status !== "none" && !hasRealSubscription);
 
   return {
     plan,
@@ -285,11 +295,11 @@ function getSubscriptionSummary(profile: ProfileSubscriptionRow | null, hasExten
     hasPaystackMetadata: canManageHosted,
     canManageHosted,
     directCancelSupported,
-    missingMetadataReason: hasExtendedColumns
-      ? canManageHosted
-        ? null
-        : "Missing Paystack subscription metadata (subscription code/email token)."
-      : "Subscription metadata columns are not available yet in your database schema."
+    missingMetadataReason: !hasExtendedColumns
+      ? "Subscription metadata columns are not available yet in your database schema."
+      : showMissingMetadataWarning
+        ? "Missing Paystack subscription metadata (subscription code/email token)."
+        : null
   };
 }
 

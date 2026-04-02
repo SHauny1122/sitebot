@@ -246,7 +246,10 @@ export async function POST(request: Request) {
 
   if (event === "charge.success") {
     profilePatch.plan = "pro";
-    profilePatch.paystack_subscription_status = subscription?.status ?? "active";
+    profilePatch.paystack_subscription_status = hasSubscriptionMetadata(subscription) ? subscription?.status ?? "active" : "none";
+    if (!hasSubscriptionMetadata(subscription)) {
+      profilePatch.paystack_next_billing_date = null;
+    }
   }
 
   if (event === "subscription.create") {

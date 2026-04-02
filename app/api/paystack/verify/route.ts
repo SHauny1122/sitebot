@@ -230,10 +230,14 @@ export async function POST(request: Request) {
     plan: "pro",
     paystack_plan_id: expectedPlan.id,
     paystack_customer_code: verifyData.data.customer?.customer_code ?? existingProfile?.paystack_customer_code ?? null,
-    paystack_subscription_status: subscriptionFromResponse?.status ?? existingProfile?.paystack_subscription_status ?? "active",
+    paystack_subscription_status: hasSubscriptionMetadata(subscriptionFromResponse)
+      ? subscriptionFromResponse?.status ?? existingProfile?.paystack_subscription_status ?? "active"
+      : "none",
     paystack_subscription_code: subscriptionFromResponse?.subscription_code ?? existingProfile?.paystack_subscription_code ?? null,
     paystack_email_token: subscriptionFromResponse?.email_token ?? existingProfile?.paystack_email_token ?? null,
-    paystack_next_billing_date: subscriptionFromResponse?.next_payment_date ?? existingProfile?.paystack_next_billing_date ?? null
+    paystack_next_billing_date: hasSubscriptionMetadata(subscriptionFromResponse)
+      ? subscriptionFromResponse?.next_payment_date ?? existingProfile?.paystack_next_billing_date ?? null
+      : null
   };
 
   console.info("[paystack/verify] Profile subscription values before save", {
