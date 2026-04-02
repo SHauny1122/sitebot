@@ -137,7 +137,8 @@ async function recoverSubscriptionMetadata(
   let recoveredSubscription: PaystackSubscriptionDetails | null = null;
   const lookupEmail = profile.email ?? fallbackEmail;
 
-  if (!recoveredCustomerCode && lookupEmail) {
+  if (lookupEmail) {
+    const previousCustomerCode = recoveredCustomerCode;
     const customerByEmailResponse = await fetch(`https://api.paystack.co/customer/${encodeURIComponent(lookupEmail)}`, {
       method: "GET",
       headers: {
@@ -152,7 +153,9 @@ async function recoverSubscriptionMetadata(
       console.info("[paystack/subscription] Metadata recovery email lookup", {
         userId,
         lookupEmail,
+        previousCustomerCodePresent: Boolean(previousCustomerCode),
         customerCodePresent: Boolean(customerByEmailData.data?.customer_code),
+        customerCodeChanged: Boolean(customerByEmailData.data?.customer_code && customerByEmailData.data.customer_code !== previousCustomerCode),
         subscriptionCodePresent: Boolean(recoveredSubscription?.subscription_code),
         emailTokenPresent: Boolean(recoveredSubscription?.email_token)
       });
