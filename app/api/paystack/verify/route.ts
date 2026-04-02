@@ -36,6 +36,15 @@ type PaystackVerifyResponse = {
   };
 };
 
+type ExistingProfilePaystackFields = {
+  email?: string | null;
+  paystack_customer_code?: string | null;
+  paystack_subscription_status?: string | null;
+  paystack_subscription_code?: string | null;
+  paystack_email_token?: string | null;
+  paystack_next_billing_date?: string | null;
+};
+
 type PaystackSubscriptionDetails = {
   subscription_code?: string;
   email_token?: string;
@@ -200,16 +209,31 @@ export async function POST(request: Request) {
     });
   }
 
+  let existingProfile: ExistingProfilePaystackFields | null = null;
+  const existingProfileResult = await supabaseAdmin
+    .from("profiles")
+    .select("email,paystack_customer_code,paystack_subscription_status,paystack_subscription_code,paystack_email_token,paystack_next_billing_date")
+    .eq("user_id", userId)
+    .maybeSingle<ExistingProfilePaystackFields>();
+
+  if (existingProfileResult.error && !isMissingColumnError(existingProfileResult.error.message)) {
+    return NextResponse.json({ error: existingProfileResult.error.message }, { status: 500 });
+  }
+
+  if (!existingProfileResult.error) {
+    existingProfile = existingProfileResult.data ?? null;
+  }
+
   const profileUpdatePayload = {
     user_id: userId,
-    email: verifyData.data.customer?.email ?? null,
+    email: verifyData.data.customer?.email ?? existingProfile?.email ?? null,
     plan: "pro",
     paystack_plan_id: expectedPlan.id,
-    paystack_customer_code: verifyData.data.customer?.customer_code ?? null,
-    paystack_subscription_status: subscriptionFromResponse?.status ?? "active",
-    paystack_subscription_code: subscriptionFromResponse?.subscription_code ?? null,
-    paystack_email_token: subscriptionFromResponse?.email_token ?? null,
-    paystack_next_billing_date: subscriptionFromResponse?.next_payment_date ?? null
+    paystack_customer_code: verifyData.data.customer?.customer_code ?? existingProfile?.paystack_customer_code ?? null,
+    paystack_subscription_status: subscriptionFromResponse?.status ?? existingProfile?.paystack_subscription_status ?? "active",
+    paystack_subscription_code: subscriptionFromResponse?.subscription_code ?? existingProfile?.paystack_subscription_code ?? null,
+    paystack_email_token: subscriptionFromResponse?.email_token ?? existingProfile?.paystack_email_token ?? null,
+    paystack_next_billing_date: subscriptionFromResponse?.next_payment_date ?? existingProfile?.paystack_next_billing_date ?? null
   };
 
   console.info("[paystack/verify] Profile subscription values before save", {

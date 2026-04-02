@@ -11,6 +11,20 @@ type PaystackSubscriptionLike = {
   status?: string;
 };
 
+type PaystackSubscriptionsResponse = {
+  status: boolean;
+  message: string;
+  data?: PaystackSubscriptionLike[];
+};
+
+type PaystackCustomerResponse = {
+  status: boolean;
+  message: string;
+  data?: {
+    subscriptions?: PaystackSubscriptionLike[];
+  };
+};
+
 type PaystackWebhookPayload = {
   event?: string;
   data?: {
@@ -56,6 +70,55 @@ function extractSubscription(data: PaystackWebhookPayload["data"]): PaystackSubs
   }
 
   return null;
+}
+
+function hasSubscriptionMetadata(value: PaystackSubscriptionLike | null) {
+  return Boolean(value?.subscription_code && value?.email_token);
+}
+
+async function fetchSubscriptionByCustomerCode(secretKey: string, customerCode: string) {
+  const subscriptionsResponse = await fetch(
+    `https://api.paystack.co/subscription?customer=${encodeURIComponent(customerCode)}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${secretKey}`
+      }
+    }
+  );
+
+  if (subscriptionsResponse.ok) {
+    const subscriptionsData = (await subscriptionsResponse.json()) as PaystackSubscriptionsResponse;
+    const match = subscriptionsData.data?.find(hasSubscriptionMetadata) ?? null;
+    if (match) {
+      return {
+        source: "subscription-list",
+        subscription: match
+      };
+    }
+  }
+
+  const customerResponse = await fetch(`https://api.paystack.co/customer/${encodeURIComponent(customerCode)}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${secretKey}`
+    }
+  });
+
+  if (!customerResponse.ok) {
+    return {
+      source: "none",
+      subscription: null
+    };
+  }
+
+  const customerData = (await customerResponse.json()) as PaystackCustomerResponse;
+  const customerSubscription = customerData.data?.subscriptions?.find(hasSubscriptionMetadata) ?? null;
+
+  return {
+    source: customerSubscription ? "customer" : "none",
+    subscription: customerSubscription
+  };
 }
 
 function getPlanIdFromMetadata(metadata: Record<string, unknown> | undefined) {
@@ -120,7 +183,25 @@ export async function POST(request: Request) {
   const metadataUserId = typeof metadata?.userId === "string" ? metadata.userId : null;
   const customerCode = data?.customer?.customer_code ?? null;
   const customerEmail = safeLower(data?.customer?.email ?? null) || null;
-  const subscription = extractSubscription(data);
+  let subscription = extractSubscription(data);
+
+  if (!hasSubscriptionMetadata(subscription) && customerCode) {
+    const fallbackResult = await fetchSubscriptionByCustomerCode(secretKey, customerCode);
+
+    if (fallbackResult.subscription) {
+      subscription = fallbackResult.subscription;
+    }
+
+    console.info("[paystack/webhook] Subscription metadata fallback result", {
+      event,
+      source: fallbackResult.source,
+      customerCodePresent: true,
+      subscriptionCodePresent: Boolean(fallbackResult.subscription?.subscription_code),
+      emailTokenPresent: Boolean(fallbackResult.subscription?.email_token),
+      nextPaymentDatePresent: Boolean(fallbackResult.subscription?.next_payment_date),
+      subscriptionStatus: fallbackResult.subscription?.status ?? null
+    });
+  }
 
   console.info("[paystack/webhook] Event received", {
     event,
