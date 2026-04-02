@@ -170,7 +170,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
           </section>
 
-          <section className="used-by-ticker mt-5 sm:mt-6" aria-label="Used by companies">
+          <div className="mt-7 text-center sm:mt-8">
+            <p className="text-xl font-semibold tracking-tight text-white/90 sm:text-2xl">
+              Trusted by founders, creators &amp; small businesses
+            </p>
+          </div>
+
+          <section className="used-by-ticker mt-4 sm:mt-5" aria-label="Used by companies">
             <div className="used-by-ticker__track">
               <div className="used-by-ticker__group" aria-hidden="true">
                 {usedBySequence.map((name, index) => (
