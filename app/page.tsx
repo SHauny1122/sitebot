@@ -97,7 +97,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       savingsText: "Save 59%"
     }
   ] as const;
-  const usedByNames = ["Flipworks", "AutoChatbot", "ITworks"] as const;
+  const usedByNames = ["Flipworks", "AutoChatbot", "ITworks", "ChatDunk"] as const;
   const usedBySequence = [...usedByNames, ...usedByNames, ...usedByNames];
 
   return (
@@ -193,6 +193,29 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     {index < usedBySequence.length - 1 ? <span className="used-by-ticker__divider">•</span> : null}
                   </span>
                 ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-10 text-center sm:mt-12" aria-label="Works with">
+            <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-[#86EFAC]">Works with</h2>
+            <p className="mt-3 text-sm text-gray-400 sm:text-base">Wix, WordPress, and any website</p>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+              <div className="group flex h-14 w-[150px] items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 transition duration-200 hover:border-[#86EFAC]/40 hover:bg-[#86EFAC]/[0.08]">
+                <svg aria-label="Wix" className="h-5 w-[72px] text-white/70 transition duration-200 group-hover:text-white" fill="none" role="img" viewBox="0 0 180 48" xmlns="http://www.w3.org/2000/svg">
+                  <text fill="currentColor" fontFamily="system-ui, -apple-system, Segoe UI, sans-serif" fontSize="28" fontWeight="700" letterSpacing="6" x="5" y="33">
+                    WIX
+                  </text>
+                </svg>
+              </div>
+
+              <div className="group flex h-14 w-[190px] items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 transition duration-200 hover:border-[#86EFAC]/40 hover:bg-[#86EFAC]/[0.08]">
+                <svg aria-label="WordPress" className="h-5 w-[126px] text-white/70 transition duration-200 group-hover:text-white" fill="none" role="img" viewBox="0 0 320 48" xmlns="http://www.w3.org/2000/svg">
+                  <text fill="currentColor" fontFamily="system-ui, -apple-system, Segoe UI, sans-serif" fontSize="25" fontWeight="600" letterSpacing="1.5" x="3" y="33">
+                    WordPress
+                  </text>
+                </svg>
               </div>
             </div>
           </section>
