@@ -405,8 +405,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       </div>
       <Script
-        src="https://sitebot-kappa.vercel.app/embed.js"
-        data-bot="a499de6d-b945-4886-a924-cc3c27e9e609"
+        src="https://autochatbot.chat/embed.js"
+        data-bot="ac140a3f-2d66-4e1c-a16d-d4d9594c9ee5"
         strategy="afterInteractive"
       />
     </main>
