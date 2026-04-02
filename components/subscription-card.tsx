@@ -224,7 +224,7 @@ export function SubscriptionCard({ initialPlan }: { initialPlan: "free" | "pro" 
       <div className="mt-5 flex flex-wrap gap-3">
         <button
           className="btn-secondary"
-          disabled={Boolean(busyAction) || loading || noActiveSubscription || !subscription?.hasPaystackMetadata}
+          disabled={Boolean(busyAction) || loading || noActiveSubscription}
           onClick={() => void handleCancel()}
           type="button"
         >
@@ -232,7 +232,7 @@ export function SubscriptionCard({ initialPlan }: { initialPlan: "free" | "pro" 
         </button>
         <button
           className="btn-primary"
-          disabled={Boolean(busyAction) || loading || noActiveSubscription || !subscription?.canManageHosted}
+          disabled={Boolean(busyAction) || loading || noActiveSubscription}
           onClick={() => void handleManage()}
           type="button"
         >
