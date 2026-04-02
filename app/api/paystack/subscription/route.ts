@@ -5,7 +5,7 @@ import { getApiUser } from "@/lib/api-user";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const actionSchema = z.object({
-  action: z.enum(["manage", "cancel"])
+  action: z.enum(["manage", "cancel", "repair"])
 });
 
 type ProfileSubscriptionRow = {
@@ -122,7 +122,8 @@ async function recoverSubscriptionMetadata(
   userId: string,
   profile: ProfileSubscriptionRow | null,
   hasExtendedColumns: boolean,
-  secretKey: string
+  secretKey: string,
+  fallbackEmail: string | null
 ) {
   if (!hasExtendedColumns || !profile || !isPaidPlan(profile.paystack_plan_id ?? profile.plan)) {
     return profile;
@@ -134,9 +135,10 @@ async function recoverSubscriptionMetadata(
 
   let recoveredCustomerCode = profile.paystack_customer_code ?? null;
   let recoveredSubscription: PaystackSubscriptionDetails | null = null;
+  const lookupEmail = profile.email ?? fallbackEmail;
 
-  if (!recoveredCustomerCode && profile.email) {
-    const customerByEmailResponse = await fetch(`https://api.paystack.co/customer/${encodeURIComponent(profile.email)}`, {
+  if (!recoveredCustomerCode && lookupEmail) {
+    const customerByEmailResponse = await fetch(`https://api.paystack.co/customer/${encodeURIComponent(lookupEmail)}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${secretKey}`
@@ -147,6 +149,19 @@ async function recoverSubscriptionMetadata(
       const customerByEmailData = (await customerByEmailResponse.json()) as PaystackCustomerLookupResponse;
       recoveredCustomerCode = customerByEmailData.data?.customer_code ?? recoveredCustomerCode;
       recoveredSubscription = customerByEmailData.data?.subscriptions?.find(hasSubscriptionMetadata) ?? null;
+      console.info("[paystack/subscription] Metadata recovery email lookup", {
+        userId,
+        lookupEmail,
+        customerCodePresent: Boolean(customerByEmailData.data?.customer_code),
+        subscriptionCodePresent: Boolean(recoveredSubscription?.subscription_code),
+        emailTokenPresent: Boolean(recoveredSubscription?.email_token)
+      });
+    } else {
+      console.warn("[paystack/subscription] Metadata recovery email lookup failed", {
+        userId,
+        lookupEmail,
+        status: customerByEmailResponse.status
+      });
     }
   }
 
@@ -159,6 +174,7 @@ async function recoverSubscriptionMetadata(
     console.info("[paystack/subscription] Metadata recovery lookup", {
       userId,
       source: fallbackResult.source,
+      lookupEmail,
       customerCodePresent: Boolean(recoveredCustomerCode),
       subscriptionCodePresent: Boolean(fallbackResult.subscription?.subscription_code),
       emailTokenPresent: Boolean(fallbackResult.subscription?.email_token),
@@ -283,8 +299,17 @@ export async function GET() {
   try {
     const { profile, hasExtendedColumns } = await getProfileSubscription(user.id);
     const secretKey = env.PAYSTACK_SECRET_KEY;
-    const recoveredProfile = secretKey ? await recoverSubscriptionMetadata(user.id, profile, hasExtendedColumns, secretKey) : profile;
+    const recoveredProfile = secretKey ? await recoverSubscriptionMetadata(user.id, profile, hasExtendedColumns, secretKey, user.email ?? null) : profile;
     const summary = getSubscriptionSummary(recoveredProfile, hasExtendedColumns);
+
+    console.info("[paystack/subscription] GET summary", {
+      userId: user.id,
+      plan: summary.plan,
+      status: summary.status,
+      hasPaystackMetadata: summary.hasPaystackMetadata,
+      customerCodePresent: Boolean(summary.customerCode),
+      missingMetadataReason: summary.missingMetadataReason
+    });
 
     return NextResponse.json({
       subscription: summary
@@ -316,8 +341,26 @@ export async function POST(request: Request) {
   }
 
   const { profile, hasExtendedColumns } = await getProfileSubscription(user.id);
-  const recoveredProfile = await recoverSubscriptionMetadata(user.id, profile, hasExtendedColumns, secretKey);
+  const recoveredProfile = await recoverSubscriptionMetadata(user.id, profile, hasExtendedColumns, secretKey, user.email ?? null);
   const summary = getSubscriptionSummary(recoveredProfile, hasExtendedColumns);
+
+  console.info("[paystack/subscription] POST request", {
+    userId: user.id,
+    action: parsed.data.action,
+    plan: summary.plan,
+    status: summary.status,
+    hasPaystackMetadata: summary.hasPaystackMetadata,
+    customerCodePresent: Boolean(summary.customerCode),
+    missingMetadataReason: summary.missingMetadataReason
+  });
+
+  if (parsed.data.action === "repair") {
+    return NextResponse.json({
+      success: true,
+      action: "repair",
+      subscription: summary
+    });
+  }
 
   const subscriptionCode = recoveredProfile?.paystack_subscription_code ?? null;
   const emailToken = recoveredProfile?.paystack_email_token ?? null;
