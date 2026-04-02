@@ -1,12 +1,16 @@
-import { env } from "@/lib/env";
-
 export async function GET() {
-  const apiOrigin = env.NEXT_PUBLIC_SITE_URL;
-
   const script = `(function(){
     var currentScript = document.currentScript;
     var botId = currentScript && currentScript.getAttribute('data-bot');
     if (!botId) return;
+
+    var apiOrigin = '';
+    try {
+      var scriptUrl = currentScript && currentScript.src ? new URL(currentScript.src, window.location.href) : null;
+      apiOrigin = scriptUrl ? scriptUrl.origin : window.location.origin;
+    } catch (_) {
+      apiOrigin = window.location.origin;
+    }
 
     var defaults = {
       buttonText: 'Chat',
@@ -78,7 +82,7 @@ export async function GET() {
       var appearance = defaults;
 
       try {
-        var settingsResponse = await fetch('${apiOrigin}/api/bots/' + encodeURIComponent(botId) + '/appearance');
+        var settingsResponse = await fetch(apiOrigin + '/api/bots/' + encodeURIComponent(botId) + '/appearance');
         if (settingsResponse.ok) {
           var settingsData = await settingsResponse.json();
           appearance = normalizeAppearance(settingsData && settingsData.appearance ? settingsData.appearance : {});
@@ -190,7 +194,7 @@ export async function GET() {
         input.value = '';
 
         try {
-          var res = await fetch('${apiOrigin}/api/chat', {
+          var res = await fetch(apiOrigin + '/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ botId: botId, message: text })

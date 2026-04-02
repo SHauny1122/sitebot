@@ -21,39 +21,125 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
-  const payload = await request.json();
-  const parsed = chatSchema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400, headers: corsHeaders });
-  }
+  const requestId = crypto.randomUUID();
 
-  const { data: bot, error: botError } = await supabaseAdmin
-    .from("bots")
-    .select("id,user_id,status")
-    .eq("id", parsed.data.botId)
-    .single();
+  try {
+    console.info("[chat] Request received", {
+      requestId,
+      method: request.method
+    });
 
-  if (botError || !bot || bot.status !== "ready") {
-    return NextResponse.json({ error: "Bot unavailable" }, { status: 404, headers: corsHeaders });
-  }
+    let payload: unknown;
+    try {
+      payload = await request.json();
+    } catch {
+      console.info("[chat] Invalid JSON payload", { requestId });
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400, headers: corsHeaders });
+    }
 
-  const plan = await getPlan(bot.user_id);
-  const used = await getUsageCount(bot.user_id);
-  if (!canSendMessage(plan, used)) {
+    const parsed = chatSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.info("[chat] Validation failed", {
+        requestId,
+        errors: parsed.error.flatten().fieldErrors
+      });
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400, headers: corsHeaders });
+    }
+
+    console.info("[chat] Looking up bot", {
+      requestId,
+      botId: parsed.data.botId
+    });
+
+    const { data: bot, error: botError } = await supabaseAdmin
+      .from("bots")
+      .select("id,user_id,status")
+      .eq("id", parsed.data.botId)
+      .single();
+
+    if (botError || !bot || bot.status !== "ready") {
+      console.info("[chat] Bot unavailable", {
+        requestId,
+        botId: parsed.data.botId,
+        botStatus: bot?.status ?? null,
+        botError: botError?.message ?? null
+      });
+      return NextResponse.json({ error: "Bot unavailable" }, { status: 404, headers: corsHeaders });
+    }
+
+    const plan = await getPlan(bot.user_id);
+    const used = await getUsageCount(bot.user_id);
+    if (!canSendMessage(plan, used)) {
+      console.info("[chat] Message limit reached", {
+        requestId,
+        botId: parsed.data.botId,
+        userId: bot.user_id,
+        plan,
+        used
+      });
+      return NextResponse.json(
+        { error: "Message limit reached for current plan" },
+        { status: 402, headers: corsHeaders }
+      );
+    }
+
+    console.info("[chat] Starting answer generation", {
+      requestId,
+      botId: parsed.data.botId,
+      userId: bot.user_id,
+      plan
+    });
+
+    const answer = await answerForBot(parsed.data.botId, parsed.data.message);
+
+    console.info("[chat] Answer generated", {
+      requestId,
+      botId: parsed.data.botId,
+      answerLength: answer.length
+    });
+
+    const { error: messageInsertError } = await supabaseAdmin.from("chat_messages").insert([
+      { bot_id: parsed.data.botId, role: "user", content: parsed.data.message },
+      { bot_id: parsed.data.botId, role: "assistant", content: answer }
+    ]);
+
+    if (messageInsertError) {
+      console.error("[chat] Failed to persist chat messages", {
+        requestId,
+        botId: parsed.data.botId,
+        error: messageInsertError.message
+      });
+    }
+
+    await incrementUsage(bot.user_id);
+
+    console.info("[chat] Response returned", {
+      requestId,
+      botId: parsed.data.botId,
+      userId: bot.user_id
+    });
+
+    return NextResponse.json({ answer }, { headers: corsHeaders });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorName = error instanceof Error ? error.name : "UnknownError";
+    const errorStatus =
+      typeof error === "object" && error !== null && "status" in error && typeof (error as { status?: unknown }).status === "number"
+        ? (error as { status: number }).status
+        : null;
+
+    console.error("[chat] Unhandled failure", {
+      requestId,
+      errorName,
+      errorMessage,
+      errorStatus
+    });
+
     return NextResponse.json(
-      { error: "Message limit reached for current plan" },
-      { status: 402, headers: corsHeaders }
+      {
+        error: "Chat is temporarily unavailable. Please try again shortly."
+      },
+      { status: 500, headers: corsHeaders }
     );
   }
-
-  const answer = await answerForBot(parsed.data.botId, parsed.data.message);
-
-  await supabaseAdmin.from("chat_messages").insert([
-    { bot_id: parsed.data.botId, role: "user", content: parsed.data.message },
-    { bot_id: parsed.data.botId, role: "assistant", content: answer }
-  ]);
-
-  await incrementUsage(bot.user_id);
-
-  return NextResponse.json({ answer }, { headers: corsHeaders });
 }
