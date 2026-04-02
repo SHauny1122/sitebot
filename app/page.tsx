@@ -160,7 +160,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="relative mx-auto max-w-4xl text-center">
               <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-[#86EFAC]">NEXT GEN AI CHATBOT</p>
               <h1 className="mx-auto max-w-4xl text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                Turn Your Website Into a Chatbot in One Click
+                Add an AI Chatbot to Your Website in Minutes (No Coding)
               </h1>
               <p className="mx-auto mt-5 max-w-3xl text-sm text-gray-400 sm:text-base">
                 Transform your website into an intelligent AI assistant that answers questions, captures leads, and helps
@@ -202,7 +202,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className="relative mt-20 mb-24 scroll-mt-24 border-t border-white/5 px-6 py-16 md:mt-32 md:mb-32 md:py-32" id="features">
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Everything you need to launch your chatbot fast.</h2>
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Everything you need to add a chatbot to your website.</h2>
           <p className="mt-2 max-w-2xl text-sm text-gray-400 sm:text-base">
             Train on your site content, customize your assistant, and go live with one script on Manual, WordPress, or Wix.
           </p>
@@ -230,7 +230,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-white/15 bg-[#0F1412] text-[#86EFAC] transition duration-200 group-hover:border-[#86EFAC]/35 group-hover:bg-[#86EFAC]/10">
                 <Code2 aria-hidden="true" className="h-5 w-5" strokeWidth={1.9} />
               </div>
-              <h3 className="text-2xl font-semibold tracking-tight">Copy-paste install</h3>
+              <h3 className="text-2xl font-semibold tracking-tight">Add chatbot to your website (copy-paste install)</h3>
               <p className="mt-4 text-base leading-relaxed text-gray-300">Works with Wix too — no app install needed, just paste one script in Wix Custom Code.</p>
             </article>
 
@@ -242,6 +242,56 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <p className="mt-4 text-base leading-relaxed text-gray-300">From URL to a live assistant quickly, without a complex implementation process.</p>
             </article>
           </div>
+        </div>
+      </section>
+
+      <section className="relative border-t border-white/5 px-6 py-16 md:py-24">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">How to add a chatbot to your website</h2>
+          <p className="mt-3 max-w-4xl text-sm text-gray-400 sm:text-base">Adding an AI chatbot to your website is simple and requires no coding.</p>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2 md:gap-8">
+            <article className="rounded-2xl border border-white/15 bg-[#0F1110] p-6 sm:p-8">
+              <p className="text-base font-semibold tracking-tight text-white">Step 1: Enter your website URL</p>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300 sm:text-base">Paste your website link and our system will scan your content.</p>
+            </article>
+
+            <article className="rounded-2xl border border-white/15 bg-[#0F1110] p-6 sm:p-8">
+              <p className="text-base font-semibold tracking-tight text-white">Step 2: Train your chatbot</p>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300 sm:text-base">Your chatbot automatically learns from your pages, FAQs, and content.</p>
+            </article>
+
+            <article className="rounded-2xl border border-white/15 bg-[#0F1110] p-6 sm:p-8">
+              <p className="text-base font-semibold tracking-tight text-white">Step 3: Customize your chatbot</p>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300 sm:text-base">Adjust colors, welcome message, and style to match your brand.</p>
+            </article>
+
+            <article className="rounded-2xl border border-white/15 bg-[#0F1110] p-6 sm:p-8">
+              <p className="text-base font-semibold tracking-tight text-white">Step 4: Add chatbot to your website</p>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300 sm:text-base">Copy and paste one script into your website (Wix, WordPress, or custom HTML).</p>
+            </article>
+
+            <article className="rounded-2xl border border-white/15 bg-[#0F1110] p-6 sm:p-8 md:col-span-2">
+              <p className="text-base font-semibold tracking-tight text-white">Step 5: Go live</p>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300 sm:text-base">Your AI chatbot is now ready to answer questions and capture leads 24/7.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative border-t border-white/5 px-6 py-16 md:py-24">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Who is this chatbot for?</h2>
+          <p className="mt-3 max-w-4xl text-sm text-gray-400 sm:text-base">This AI chatbot is perfect for:</p>
+          <ul className="mt-6 space-y-3 text-sm text-gray-300 sm:text-base">
+            <li>Small businesses that want to capture more leads</li>
+            <li>Founders who want to automate customer support</li>
+            <li>Agencies building websites for clients</li>
+            <li>E-commerce stores that want to answer questions instantly</li>
+            <li>Anyone who wants a chatbot without coding</li>
+          </ul>
         </div>
       </section>
 
