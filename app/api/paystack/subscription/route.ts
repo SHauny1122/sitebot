@@ -205,7 +205,7 @@ async function recoverSubscriptionMetadata(
 
   if (recoveredSubscription?.status) {
     patch.paystack_subscription_status = recoveredSubscription.status;
-  } else if (!profile.paystack_subscription_code && !profile.paystack_email_token) {
+  } else if (!profile.paystack_subscription_code || !profile.paystack_email_token) {
     const normalizedStatus = (profile.paystack_subscription_status ?? "").trim().toLowerCase();
     if (normalizedStatus && normalizedStatus !== "none" && normalizedStatus !== "cancelled") {
       patch.paystack_subscription_status = "none";
@@ -213,6 +213,11 @@ async function recoverSubscriptionMetadata(
 
     if (profile.paystack_next_billing_date) {
       patch.paystack_next_billing_date = null;
+    }
+
+    if (isPaidPlan(profile.paystack_plan_id ?? profile.plan)) {
+      patch.plan = "free";
+      patch.paystack_plan_id = null;
     }
   }
 

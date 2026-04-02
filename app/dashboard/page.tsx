@@ -10,7 +10,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
 
   const [{ data: profile }, { data: bots }, { data: usage }] = await Promise.all([
-    supabaseAdmin.from("profiles").select("plan").eq("user_id", user.id).single(),
+    supabaseAdmin
+      .from("profiles")
+      .select("plan,paystack_subscription_code,paystack_email_token")
+      .eq("user_id", user.id)
+      .single(),
     supabaseAdmin
       .from("bots")
       .select("id,name,status,website_url,created_at")
@@ -19,7 +23,8 @@ export default async function DashboardPage() {
     supabaseAdmin.from("message_usage").select("message_count").eq("user_id", user.id).order("month_key", { ascending: false }).limit(1).maybeSingle()
   ]);
 
-  const plan = profile?.plan ?? "free";
+  const hasRealPaystackSubscription = Boolean(profile?.paystack_subscription_code && profile?.paystack_email_token);
+  const plan = hasRealPaystackSubscription ? profile?.plan ?? "free" : "free";
   const messages = usage?.message_count ?? 0;
 
   return (
