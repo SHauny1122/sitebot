@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Script from "next/script";
+import Image from "next/image";
 import { Code2, Globe, SlidersHorizontal, Zap } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { PricingPlanGrid } from "@/components/pricing-plan-grid";
@@ -203,19 +204,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
               <div className="group flex h-14 w-[150px] items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 transition duration-200 hover:border-[#86EFAC]/40 hover:bg-[#86EFAC]/[0.08]">
-                <svg aria-label="Wix" className="h-5 w-[72px] text-white/70 transition duration-200 group-hover:text-white" fill="none" role="img" viewBox="0 0 180 48" xmlns="http://www.w3.org/2000/svg">
-                  <text fill="currentColor" fontFamily="system-ui, -apple-system, Segoe UI, sans-serif" fontSize="28" fontWeight="700" letterSpacing="6" x="5" y="33">
-                    WIX
-                  </text>
-                </svg>
+                <Image
+                  alt="Wix logo"
+                  className="h-8 w-auto opacity-70 transition-all duration-300 group-hover:opacity-100 sm:h-9"
+                  height={40}
+                  src="/logos/wix.svg"
+                  width={140}
+                />
               </div>
 
               <div className="group flex h-14 w-[190px] items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-4 transition duration-200 hover:border-[#86EFAC]/40 hover:bg-[#86EFAC]/[0.08]">
-                <svg aria-label="WordPress" className="h-5 w-[126px] text-white/70 transition duration-200 group-hover:text-white" fill="none" role="img" viewBox="0 0 320 48" xmlns="http://www.w3.org/2000/svg">
-                  <text fill="currentColor" fontFamily="system-ui, -apple-system, Segoe UI, sans-serif" fontSize="25" fontWeight="600" letterSpacing="1.5" x="3" y="33">
-                    WordPress
-                  </text>
-                </svg>
+                <Image
+                  alt="WordPress logo"
+                  className="h-8 w-auto opacity-70 transition-all duration-300 group-hover:opacity-100 sm:h-9"
+                  height={40}
+                  src="/logos/wordpress.svg"
+                  width={160}
+                />
               </div>
             </div>
           </section>
