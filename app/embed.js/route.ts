@@ -1,7 +1,20 @@
 import { env } from "@/lib/env";
 
+function resolveCanonicalOrigin() {
+  const configured = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+
+  try {
+    const parsed = new URL(configured);
+    const needsWww = parsed.host === "autochatbot.chat";
+    const host = needsWww ? `www.${parsed.host}` : parsed.host;
+    return `${parsed.protocol}//${host}`;
+  } catch {
+    return "https://www.autochatbot.chat";
+  }
+}
+
 export async function GET() {
-  const canonicalOrigin = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  const canonicalOrigin = resolveCanonicalOrigin();
 
   const script = `(function(){
     var currentScript = document.currentScript;
@@ -9,14 +22,6 @@ export async function GET() {
     if (!botId) return;
 
     var apiOrigin = ${JSON.stringify(canonicalOrigin)};
-    if (!apiOrigin) {
-      try {
-        var scriptUrl = currentScript && currentScript.src ? new URL(currentScript.src, window.location.href) : null;
-        apiOrigin = scriptUrl ? scriptUrl.origin : window.location.origin;
-      } catch (_) {
-        apiOrigin = window.location.origin;
-      }
-    }
 
     var defaults = {
       buttonText: 'Chat',
@@ -233,7 +238,10 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "application/javascript; charset=utf-8",
-      "Cache-Control": "public, max-age=60"
+      "Cache-Control": "no-store, max-age=0, s-maxage=0, must-revalidate",
+      "CDN-Cache-Control": "no-store",
+      "Vercel-CDN-Cache-Control": "no-store",
+      Pragma: "no-cache"
     }
   });
 }
