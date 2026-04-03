@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { answerForBot } from "@/lib/chat";
+import { answerForBot, getFallbackAnswer } from "@/lib/chat";
 import { canSendMessage } from "@/lib/pricing";
 import { getPlan, getUsageCount, incrementUsage } from "@/lib/bots";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { env } from "@/lib/env";
 
 const chatSchema = z.object({
   botId: z.string().uuid(),
@@ -22,11 +23,13 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
+  const openAiKeyPresent = Boolean(env.OPENAI_API_KEY);
 
   try {
     console.info("[chat] Request received", {
       requestId,
-      method: request.method
+      method: request.method,
+      openAiKeyPresent
     });
 
     let payload: unknown;
@@ -90,17 +93,30 @@ export async function POST(request: Request) {
       plan
     });
 
-    const answer = await answerForBot(parsed.data.botId, parsed.data.message);
+    const answerResult = await answerForBot(parsed.data.botId, parsed.data.message);
 
     console.info("[chat] Answer generated", {
       requestId,
       botId: parsed.data.botId,
-      answerLength: answer.length
+      answerLength: answerResult.answer.length,
+      attempts: answerResult.attempts,
+      usedFallback: answerResult.usedFallback
     });
+
+    if (answerResult.usedFallback && answerResult.errorDetails) {
+      console.warn("[chat] Fallback answer returned", {
+        requestId,
+        botId: parsed.data.botId,
+        errorName: answerResult.errorDetails.name,
+        errorCode: answerResult.errorDetails.code ?? null,
+        errorStatus: answerResult.errorDetails.status ?? null,
+        errorMessage: answerResult.errorDetails.message
+      });
+    }
 
     const { error: messageInsertError } = await supabaseAdmin.from("chat_messages").insert([
       { bot_id: parsed.data.botId, role: "user", content: parsed.data.message },
-      { bot_id: parsed.data.botId, role: "assistant", content: answer }
+      { bot_id: parsed.data.botId, role: "assistant", content: answerResult.answer }
     ]);
 
     if (messageInsertError) {
@@ -116,10 +132,19 @@ export async function POST(request: Request) {
     console.info("[chat] Response returned", {
       requestId,
       botId: parsed.data.botId,
-      userId: bot.user_id
+      userId: bot.user_id,
+      status: 200,
+      usedFallback: answerResult.usedFallback
     });
 
-    return NextResponse.json({ answer }, { headers: corsHeaders });
+    return NextResponse.json(
+      {
+        answer: answerResult.answer,
+        usedFallback: answerResult.usedFallback,
+        attempts: answerResult.attempts
+      },
+      { headers: corsHeaders }
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorName = error instanceof Error ? error.name : "UnknownError";
@@ -132,14 +157,21 @@ export async function POST(request: Request) {
       requestId,
       errorName,
       errorMessage,
-      errorStatus
+      errorStatus,
+      openAiKeyPresent,
+      fallbackProvided: true
     });
+
+    const fallbackAnswer = getFallbackAnswer();
 
     return NextResponse.json(
       {
-        error: "Chat is temporarily unavailable. Please try again shortly."
+        answer: fallbackAnswer,
+        usedFallback: true,
+        attempts: 0,
+        error: "fallback"
       },
-      { status: 500, headers: corsHeaders }
+      { status: 200, headers: corsHeaders }
     );
   }
 }

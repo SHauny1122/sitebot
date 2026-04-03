@@ -1,15 +1,21 @@
+import { env } from "@/lib/env";
+
 export async function GET() {
+  const canonicalOrigin = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+
   const script = `(function(){
     var currentScript = document.currentScript;
     var botId = currentScript && currentScript.getAttribute('data-bot');
     if (!botId) return;
 
-    var apiOrigin = '';
-    try {
-      var scriptUrl = currentScript && currentScript.src ? new URL(currentScript.src, window.location.href) : null;
-      apiOrigin = scriptUrl ? scriptUrl.origin : window.location.origin;
-    } catch (_) {
-      apiOrigin = window.location.origin;
+    var apiOrigin = ${JSON.stringify(canonicalOrigin)};
+    if (!apiOrigin) {
+      try {
+        var scriptUrl = currentScript && currentScript.src ? new URL(currentScript.src, window.location.href) : null;
+        apiOrigin = scriptUrl ? scriptUrl.origin : window.location.origin;
+      } catch (_) {
+        apiOrigin = window.location.origin;
+      }
     }
 
     var defaults = {
