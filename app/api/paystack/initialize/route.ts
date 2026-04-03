@@ -55,6 +55,8 @@ export async function POST(request: Request) {
 
   const plan = PAYSTACK_PLANS[planId];
   const planCode = planId === "monthly" ? env.PAYSTACK_PLAN_MONTHLY : env.PAYSTACK_PLAN_YEARLY;
+  const planAmountMinor = planId === "monthly" ? 16999 : 82999;
+  const planAmountLabel = planId === "monthly" ? "16999" : "82999";
   if (!planCode) {
     console.error("[paystack/initialize] Missing Paystack plan code", {
       userId: user.id,
@@ -69,13 +71,16 @@ export async function POST(request: Request) {
     userId: user.id,
     email: user.email,
     plan: plan.id,
-    planCode
+    planCode,
+    planAmountMinor,
+    planAmountLabel
   });
 
   const callbackUrl = `${env.NEXT_PUBLIC_SITE_URL}/payment/callback?plan=${encodeURIComponent(plan.id)}`;
 
   const initializePayload = {
     email: user.email,
+    amount: planAmountMinor,
     plan: planCode,
     reference,
     callback_url: callbackUrl,
@@ -84,13 +89,16 @@ export async function POST(request: Request) {
       userId: user.id,
       planName: plan.name,
       interval: plan.intervalLabel,
-      planCode
+      planCode,
+      amountMinor: planAmountLabel
     }
   };
 
   console.info("[paystack/initialize] Request payload", {
     email: initializePayload.email,
+    amount: initializePayload.amount,
     planCode,
+    planCodeEnvPresent: Boolean(planCode),
     callback_url: initializePayload.callback_url,
     reference: initializePayload.reference
   });
@@ -107,25 +115,28 @@ export async function POST(request: Request) {
   const paystackData = (await paystackResponse.json()) as PaystackInitializeResponse;
 
   if (!paystackResponse.ok || !paystackData.status || !paystackData.data?.authorization_url) {
-    console.info("[paystack/initialize] Paystack initialize failed", {
+    console.error("[paystack/initialize] Paystack initialize failed", {
       userId: user.id,
       plan: plan.id,
       status: paystackResponse.status,
       message: paystackData.message,
-      planCode
+      planCode,
+      paystackBody: paystackData
     });
 
     const responseStatus = paystackResponse.status >= 400 ? paystackResponse.status : 502;
 
     return NextResponse.json(
       {
-        error: paystackData.message || "Failed to initialize payment.",
+        error: paystackData.message || "Paystack rejected the checkout request. Please try again or contact support.",
         details: {
           paystackHttpStatus: paystackResponse.status,
           paystackStatus: paystackData.status,
           paystackMessage: paystackData.message,
+          paystackBody: paystackData,
           plan: plan.id,
           planCode,
+          amount: initializePayload.amount,
           callbackUrl,
           reference
         }
