@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiUser } from "@/lib/api-user";
@@ -53,23 +54,29 @@ export async function POST(request: Request) {
   }
 
   const plan = PAYSTACK_PLANS[planId];
+  const planCode = planId === "monthly" ? env.PAYSTACK_PLAN_MONTHLY : env.PAYSTACK_PLAN_YEARLY;
+  if (!planCode) {
+    console.error("[paystack/initialize] Missing Paystack plan code", {
+      userId: user.id,
+      plan: plan.id
+    });
+    return NextResponse.json({ error: "PAYSTACK plan codes are not configured." }, { status: 500 });
+  }
+
   const reference = `sitechat_${plan.id}_${crypto.randomUUID()}`;
-  const initializeCurrency = "ZAR";
 
   console.info("[paystack/initialize] Initializing transaction", {
     userId: user.id,
     email: user.email,
     plan: plan.id,
-    amountMinor: plan.amountMinor,
-    currency: initializeCurrency
+    planCode
   });
 
   const callbackUrl = `${env.NEXT_PUBLIC_SITE_URL}/payment/callback?plan=${encodeURIComponent(plan.id)}`;
 
   const initializePayload = {
     email: user.email,
-    amount: plan.amountMinor,
-    currency: initializeCurrency,
+    plan: planCode,
     reference,
     callback_url: callbackUrl,
     metadata: {
@@ -77,15 +84,13 @@ export async function POST(request: Request) {
       userId: user.id,
       planName: plan.name,
       interval: plan.intervalLabel,
-      amountMinor: plan.amountMinor,
-      currency: initializeCurrency
+      planCode
     }
   };
 
   console.info("[paystack/initialize] Request payload", {
     email: initializePayload.email,
-    amount: initializePayload.amount,
-    currency: initializePayload.currency,
+    planCode,
     callback_url: initializePayload.callback_url,
     reference: initializePayload.reference
   });
@@ -107,7 +112,7 @@ export async function POST(request: Request) {
       plan: plan.id,
       status: paystackResponse.status,
       message: paystackData.message,
-      currency: initializeCurrency
+      planCode
     });
 
     const responseStatus = paystackResponse.status >= 400 ? paystackResponse.status : 502;
@@ -120,8 +125,7 @@ export async function POST(request: Request) {
           paystackStatus: paystackData.status,
           paystackMessage: paystackData.message,
           plan: plan.id,
-          amount: plan.amountMinor,
-          currency: initializeCurrency,
+          planCode,
           callbackUrl,
           reference
         }

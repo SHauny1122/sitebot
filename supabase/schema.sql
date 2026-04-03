@@ -6,6 +6,7 @@ create table if not exists public.profiles (
   email text,
   plan text not null default 'free' check (plan in ('free', 'pro')),
   paystack_plan_id text,
+  paystack_plan_code text,
   paystack_customer_code text,
   paystack_subscription_status text,
   paystack_subscription_code text,
@@ -15,6 +16,7 @@ create table if not exists public.profiles (
 );
 
 alter table public.profiles add column if not exists paystack_plan_id text;
+alter table public.profiles add column if not exists paystack_plan_code text;
 alter table public.profiles add column if not exists paystack_customer_code text;
 alter table public.profiles add column if not exists paystack_subscription_status text;
 alter table public.profiles add column if not exists paystack_subscription_code text;

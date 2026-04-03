@@ -9,6 +9,10 @@ type PaystackSubscriptionLike = {
   email_token?: string;
   next_payment_date?: string;
   status?: string;
+  plan_code?: string;
+  plan?: {
+    plan_code?: string;
+  };
 };
 
 type PaystackSubscriptionsResponse = {
@@ -124,6 +128,10 @@ async function fetchSubscriptionByCustomerCode(secretKey: string, customerCode: 
 function getPlanIdFromMetadata(metadata: Record<string, unknown> | undefined) {
   const planId = typeof metadata?.planId === "string" ? metadata.planId : "";
   return isPaystackPlanId(planId) ? planId : null;
+}
+
+function getPlanCodeFromMetadata(metadata: Record<string, unknown> | undefined) {
+  return typeof metadata?.planCode === "string" ? metadata.planCode : null;
 }
 
 async function resolveUserId(customerCode: string | null, customerEmail: string | null, metadataUserId: string | null) {
@@ -243,17 +251,28 @@ export async function POST(request: Request) {
 
   const planId = getPlanIdFromMetadata(metadata);
   if (planId) profilePatch.paystack_plan_id = planId;
+  const metadataPlanCode = getPlanCodeFromMetadata(metadata);
+  if (metadataPlanCode) profilePatch.paystack_plan_code = metadataPlanCode;
 
   if (event === "charge.success") {
-    profilePatch.plan = "pro";
-    profilePatch.paystack_subscription_status = hasSubscriptionMetadata(subscription) ? subscription?.status ?? "active" : "none";
-    if (!hasSubscriptionMetadata(subscription)) {
+    if (hasSubscriptionMetadata(subscription)) {
+      profilePatch.plan = "pro";
+      profilePatch.paystack_subscription_status = subscription?.status ?? "active";
+    } else {
+      profilePatch.plan = "free";
+      profilePatch.paystack_subscription_status = "none";
       profilePatch.paystack_next_billing_date = null;
+      profilePatch.paystack_plan_id = planId ?? null;
+      profilePatch.paystack_plan_code = metadataPlanCode ?? null;
     }
   }
 
   if (event === "subscription.create") {
     profilePatch.paystack_subscription_status = subscription?.status ?? "active";
+    if (hasSubscriptionMetadata(subscription)) {
+      profilePatch.plan = "pro";
+      profilePatch.paystack_plan_code = subscription?.plan_code ?? subscription?.plan?.plan_code ?? profilePatch.paystack_plan_code ?? null;
+    }
   }
 
   if (event === "subscription.disable") {
@@ -284,6 +303,9 @@ export async function POST(request: Request) {
   if (subscription?.next_payment_date) {
     profilePatch.paystack_next_billing_date = subscription.next_payment_date;
   }
+  if (subscription?.plan_code || subscription?.plan?.plan_code) {
+    profilePatch.paystack_plan_code = subscription.plan_code ?? subscription.plan?.plan_code ?? profilePatch.paystack_plan_code ?? null;
+  }
 
   if (Object.keys(profilePatch).length === 0) {
     return NextResponse.json({ received: true, event, matchedProfile: true, updated: false });
@@ -303,7 +325,10 @@ export async function POST(request: Request) {
   console.info("[paystack/webhook] Profile updated", {
     event,
     userId,
-    updatedKeys: Object.keys(profilePatch)
+    updatedKeys: Object.keys(profilePatch),
+    subscriptionStatus: profilePatch.paystack_subscription_status,
+    plan: profilePatch.plan,
+    planCodeStored: profilePatch.paystack_plan_code ?? null
   });
 
   return NextResponse.json({ received: true, event, matchedProfile: true, updated: true });

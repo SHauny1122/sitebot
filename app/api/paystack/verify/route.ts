@@ -22,12 +22,20 @@ type PaystackVerifyResponse = {
       email_token?: string;
       next_payment_date?: string;
       status?: string;
+      plan_code?: string;
+      plan?: {
+        plan_code?: string;
+      };
     };
     subscriptions?: {
       subscription_code?: string;
       email_token?: string;
       next_payment_date?: string;
       status?: string;
+      plan_code?: string;
+      plan?: {
+        plan_code?: string;
+      };
     }[];
     customer?: {
       email?: string;
@@ -38,6 +46,9 @@ type PaystackVerifyResponse = {
 
 type ExistingProfilePaystackFields = {
   email?: string | null;
+  plan?: string | null;
+  paystack_plan_id?: string | null;
+  paystack_plan_code?: string | null;
   paystack_customer_code?: string | null;
   paystack_subscription_status?: string | null;
   paystack_subscription_code?: string | null;
@@ -50,6 +61,10 @@ type PaystackSubscriptionDetails = {
   email_token?: string;
   next_payment_date?: string;
   status?: string;
+  plan_code?: string;
+  plan?: {
+    plan_code?: string;
+  };
 };
 
 type PaystackSubscriptionsResponse = {
@@ -149,6 +164,7 @@ export async function POST(request: Request) {
 
   const metadata = verifyData.data.metadata ?? {};
   const metadataPlan = typeof metadata.planId === "string" ? metadata.planId : "";
+  const metadataPlanCode = typeof metadata.planCode === "string" ? metadata.planCode : null;
   const userId = typeof metadata.userId === "string" ? metadata.userId : "";
 
   if (!isPaystackPlanId(metadataPlan)) {
@@ -212,7 +228,9 @@ export async function POST(request: Request) {
   let existingProfile: ExistingProfilePaystackFields | null = null;
   const existingProfileResult = await supabaseAdmin
     .from("profiles")
-    .select("email,paystack_customer_code,paystack_subscription_status,paystack_subscription_code,paystack_email_token,paystack_next_billing_date")
+    .select(
+      "email,plan,paystack_plan_id,paystack_plan_code,paystack_customer_code,paystack_subscription_status,paystack_subscription_code,paystack_email_token,paystack_next_billing_date"
+    )
     .eq("user_id", userId)
     .maybeSingle<ExistingProfilePaystackFields>();
 
@@ -224,25 +242,42 @@ export async function POST(request: Request) {
     existingProfile = existingProfileResult.data ?? null;
   }
 
+  const hasRealSubscription = hasSubscriptionMetadata(subscriptionFromResponse);
+  const derivedPlanCode =
+    subscriptionFromResponse?.plan_code ??
+    subscriptionFromResponse?.plan?.plan_code ??
+    metadataPlanCode ??
+    existingProfile?.paystack_plan_code ??
+    null;
+
+  if (!hasRealSubscription) {
+    console.warn("[paystack/verify] No Paystack subscription metadata returned", {
+      reference: verifyData.data.reference,
+      metadataPlan,
+      metadataPlanCode,
+      customerCodePresent: Boolean(verifyData.data.customer?.customer_code)
+    });
+  }
+
   const profileUpdatePayload = {
     user_id: userId,
     email: verifyData.data.customer?.email ?? existingProfile?.email ?? null,
-    plan: "pro",
-    paystack_plan_id: expectedPlan.id,
+    plan: hasRealSubscription ? "pro" : "free",
+    paystack_plan_id: hasRealSubscription ? expectedPlan.id : null,
+    paystack_plan_code: hasRealSubscription ? derivedPlanCode : null,
     paystack_customer_code: verifyData.data.customer?.customer_code ?? existingProfile?.paystack_customer_code ?? null,
-    paystack_subscription_status: hasSubscriptionMetadata(subscriptionFromResponse)
+    paystack_subscription_status: hasRealSubscription
       ? subscriptionFromResponse?.status ?? existingProfile?.paystack_subscription_status ?? "active"
       : "none",
-    paystack_subscription_code: subscriptionFromResponse?.subscription_code ?? existingProfile?.paystack_subscription_code ?? null,
-    paystack_email_token: subscriptionFromResponse?.email_token ?? existingProfile?.paystack_email_token ?? null,
-    paystack_next_billing_date: hasSubscriptionMetadata(subscriptionFromResponse)
-      ? subscriptionFromResponse?.next_payment_date ?? existingProfile?.paystack_next_billing_date ?? null
-      : null
+    paystack_subscription_code: hasRealSubscription ? subscriptionFromResponse?.subscription_code ?? null : null,
+    paystack_email_token: hasRealSubscription ? subscriptionFromResponse?.email_token ?? null : null,
+    paystack_next_billing_date: hasRealSubscription ? subscriptionFromResponse?.next_payment_date ?? null : null
   };
 
   console.info("[paystack/verify] Profile subscription values before save", {
     reference: verifyData.data.reference,
     paystackPlanId: profileUpdatePayload.paystack_plan_id,
+    paystackPlanCode: profileUpdatePayload.paystack_plan_code,
     customerCodePresent: Boolean(profileUpdatePayload.paystack_customer_code),
     subscriptionStatus: profileUpdatePayload.paystack_subscription_status,
     subscriptionCodePresent: Boolean(profileUpdatePayload.paystack_subscription_code),

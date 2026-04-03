@@ -6,6 +6,8 @@ const schema = z.object({
   NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: z.string().optional().default(""),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   PAYSTACK_SECRET_KEY: z.string().optional().default(""),
+  PAYSTACK_PLAN_MONTHLY: z.string().trim().min(1, "PAYSTACK_PLAN_MONTHLY is required"),
+  PAYSTACK_PLAN_YEARLY: z.string().trim().min(1, "PAYSTACK_PLAN_YEARLY is required"),
   OPENAI_API_KEY: z.string().min(1),
   NEXT_PUBLIC_SITE_URL: z.string().url(),
   ADMIN_EMAILS: z.string().optional().default("")
@@ -24,6 +26,8 @@ export const env = parsed.success
       NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
       PAYSTACK_SECRET_KEY: "",
+      PAYSTACK_PLAN_MONTHLY: "",
+      PAYSTACK_PLAN_YEARLY: "",
       OPENAI_API_KEY: "",
       NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
       ADMIN_EMAILS: ""
